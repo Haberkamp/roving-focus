@@ -119,3 +119,30 @@ it("focuses the third item when pressing the right arrow key on the second item"
   // ASSERT
   await expect.element(screen.getByText("Item 3")).toHaveFocus();
 });
+
+it("focuses the last item when pressing the right arrow key on the second item", async () => {
+  // ARRANGE
+  const screen = await render(
+    <RovingIndexGroup>
+      <RovingIndexItem>Item 1</RovingIndexItem>
+      <RovingIndexItem>Item 2</RovingIndexItem>
+    </RovingIndexGroup>,
+  );
+
+  await userEvent.tab();
+  await userEvent.keyboard("{ArrowRight}");
+
+  // ACT
+  await userEvent.keyboard("{ArrowRight}");
+
+  // ASSERT
+  await expect.element(screen.getByText("Item 1")).toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 1"))
+    .toHaveAttribute("tabindex", "0");
+
+  await expect.element(screen.getByText("Item 2")).not.toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 2"))
+    .toHaveAttribute("tabindex", "-1");
+});
