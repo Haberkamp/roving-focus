@@ -6,10 +6,17 @@ import {
   useRef,
 } from "react";
 import { useRovingIndex } from "./RovingIndexGroup";
+import { Slot } from "@radix-ui/react-slot";
 
-export type RovingIndexItemProps = {} & ComponentPropsWithoutRef<"span">;
+export type RovingIndexItemProps = {
+  asChild?: boolean;
+} & ComponentPropsWithoutRef<"span">;
 
-export function RovingIndexItem({ onFocus, ...props }: RovingIndexItemProps) {
+export function RovingIndexItem({
+  onFocus,
+  asChild = false,
+  ...props
+}: RovingIndexItemProps) {
   const id = useId();
   const {
     registerItem,
@@ -52,8 +59,10 @@ export function RovingIndexItem({ onFocus, ...props }: RovingIndexItemProps) {
     }
   };
 
+  const Component = asChild ? Slot : "span";
+
   return (
-    <span
+    <Component
       ref={ref}
       data-roving-index-item={id}
       tabIndex={tabIndex}

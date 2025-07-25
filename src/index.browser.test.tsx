@@ -361,3 +361,34 @@ it.each(["PageUp", "Home"])(
       .toHaveAttribute("tabindex", "-1");
   },
 );
+
+it("renders as a button using the asChild prop", async () => {
+  // ARRANGE
+  const screen = await render(
+    <RovingIndexGroup>
+      <RovingIndexItem>Item 1</RovingIndexItem>
+
+      <RovingIndexItem asChild>
+        <button>Item 2</button>
+      </RovingIndexItem>
+    </RovingIndexGroup>,
+  );
+
+  // ACT
+  await userEvent.tab();
+  await userEvent.keyboard("{ArrowRight}");
+
+  // ASSERT
+  await expect
+    .element(screen.getByRole("button", { name: "Item 2" }))
+    .toHaveFocus();
+
+  await expect
+    .element(screen.getByRole("button", { name: "Item 2" }))
+    .toHaveAttribute("tabindex", "0");
+
+  await expect.element(screen.getByText("Item 1")).not.toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 1"))
+    .toHaveAttribute("tabindex", "-1");
+});
