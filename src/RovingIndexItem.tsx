@@ -18,6 +18,7 @@ export function RovingIndexItem({ onFocus, ...props }: RovingIndexItemProps) {
     focusNextItem,
     focusPreviousItem,
     focusLastItem,
+    focusFirstItem,
   } = useRovingIndex();
 
   useEffect(() => {
@@ -44,6 +45,10 @@ export function RovingIndexItem({ onFocus, ...props }: RovingIndexItemProps) {
 
     if (event.key === "PageDown" || event.key === "End") {
       focusLastItem();
+    }
+
+    if (event.key === "PageUp" || event.key === "Home") {
+      focusFirstItem();
     }
   };
 

@@ -15,6 +15,7 @@ type RovingIndexContextType = {
   focusNextItem: () => void;
   focusPreviousItem: () => void;
   focusLastItem: () => void;
+  focusFirstItem: () => void;
 };
 
 const RovingIndexContext = createContext<RovingIndexContextType | null>(null);
@@ -105,6 +106,19 @@ export function RovingIndexGroup({
     }
   };
 
+  const focusFirstItem = () => {
+    setCurrentIndex(0);
+
+    const firstItem = registeredItems.current[0];
+    const firstItemElement = groupRef.current?.querySelector(
+      `[data-roving-index-item="${firstItem}"]`,
+    );
+
+    if (firstItemElement) {
+      (firstItemElement as HTMLElement).focus();
+    }
+  };
+
   const contextValue: RovingIndexContextType = {
     currentIndex,
     setCurrentIndex,
@@ -114,6 +128,7 @@ export function RovingIndexGroup({
     focusNextItem,
     focusPreviousItem,
     focusLastItem,
+    focusFirstItem,
   };
 
   return (
