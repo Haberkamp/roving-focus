@@ -46,10 +46,6 @@ export function RovingIndexGroup({
     const index = registeredItems.current.indexOf(id);
     if (index > -1) {
       registeredItems.current.splice(index, 1);
-      // Adjust current index if needed
-      if (currentIndex >= registeredItems.current.length) {
-        setCurrentIndex(Math.max(0, registeredItems.current.length - 1));
-      }
     }
   };
 
