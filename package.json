@@ -1,0 +1,35 @@
+{
+  "name": "dummy-react-package",
+  "version": "1.0.0",
+  "description": "A dummy React package with TypeScript and Vitest",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "react",
+    "typescript",
+    "component"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "@testing-library/react": "^14.1.2",
+    "@testing-library/jest-dom": "^6.2.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.2.0",
+    "@vitest/coverage-v8": "^1.2.0",
+    "jsdom": "^24.0.0"
+  },
+  "files": [
+    "dist"
+  ]
+}
