@@ -1,0 +1,6 @@
+# .git-blame-ignore-revs
+# This file contains a list of revisions that should be ignored by git blame.
+# These are typically formatting commits that don't change functionality.
+
+# Format code with Prettier
+7e2f2df
