@@ -203,3 +203,37 @@ it("focuses the last item when pressing the left arrow key on the first item", a
     .element(screen.getByText("Item 1"))
     .toHaveAttribute("tabindex", "-1");
 });
+
+it("focuses back to the last selected item when pressing Shift + Tab", async () => {
+  // ARRANGE
+  const screen = await render(
+    <div>
+      <RovingIndexGroup>
+        <RovingIndexItem>Item 1</RovingIndexItem>
+        <RovingIndexItem>Item 2</RovingIndexItem>
+      </RovingIndexGroup>
+
+      <button>Outside</button>
+    </div>,
+  );
+
+  await userEvent.tab();
+  await userEvent.keyboard("{ArrowRight}");
+  await userEvent.tab();
+
+  // ACT
+  await userEvent.tab({
+    shift: true,
+  });
+
+  // ASSERT
+  await expect.element(screen.getByText("Item 2")).toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 2"))
+    .toHaveAttribute("tabindex", "0");
+
+  await expect.element(screen.getByText("Item 1")).not.toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 1"))
+    .toHaveAttribute("tabindex", "-1");
+});
