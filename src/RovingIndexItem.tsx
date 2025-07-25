@@ -1,11 +1,18 @@
-import { ComponentPropsWithoutRef, useEffect, useId } from "react";
+import {
+  ComponentPropsWithoutRef,
+  useEffect,
+  useId,
+  KeyboardEvent,
+  useRef,
+} from "react";
 import { useRovingIndex } from "./RovingIndexGroup";
 
 export type RovingIndexItemProps = {} & ComponentPropsWithoutRef<"span">;
 
 export function RovingIndexItem({ onFocus, ...props }: RovingIndexItemProps) {
   const id = useId();
-  const { registerItem, unregisterItem, getTabIndex } = useRovingIndex();
+  const { registerItem, unregisterItem, getTabIndex, focusNextItem } =
+    useRovingIndex();
 
   useEffect(() => {
     registerItem(id);
@@ -18,5 +25,21 @@ export function RovingIndexItem({ onFocus, ...props }: RovingIndexItemProps) {
   const itemIndex = registerItem(id);
   const tabIndex = getTabIndex(itemIndex);
 
-  return <span tabIndex={tabIndex} {...props} />;
+  const ref = useRef<HTMLSpanElement>(null);
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLSpanElement>) => {
+    if (event.key === "ArrowRight") {
+      focusNextItem();
+    }
+  };
+
+  return (
+    <span
+      ref={ref}
+      data-roving-index-item={id}
+      tabIndex={tabIndex}
+      onKeyDown={handleKeyDown}
+      {...props}
+    />
+  );
 }

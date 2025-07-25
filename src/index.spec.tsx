@@ -67,3 +67,22 @@ it("re-focuses the first item when pressing Shift + Tab", async () => {
   // ASSERT
   expect(screen.getByText("Item 1")).toHaveFocus();
 });
+
+it("focuses the next item when pressing the right arrow key", async () => {
+  // ARRANGE
+  render(
+    <RovingIndexGroup>
+      <RovingIndexItem>Item 1</RovingIndexItem>
+      <RovingIndexItem>Item 2</RovingIndexItem>
+      <RovingIndexItem>Item 3</RovingIndexItem>
+    </RovingIndexGroup>,
+  );
+
+  await userEvent.tab();
+
+  // ACT
+  await userEvent.keyboard("{ArrowRight}");
+
+  // ASSERT
+  expect(screen.getByText("Item 2")).toHaveFocus();
+});

@@ -4,7 +4,6 @@ import {
   useContext,
   useState,
   useRef,
-  KeyboardEvent,
 } from "react";
 
 type RovingIndexContextType = {
@@ -13,6 +12,7 @@ type RovingIndexContextType = {
   registerItem: (id: string) => number;
   unregisterItem: (id: string) => void;
   getTabIndex: (itemIndex: number) => number;
+  focusNextItem: () => void;
 };
 
 const RovingIndexContext = createContext<RovingIndexContextType | null>(null);
@@ -57,12 +57,27 @@ export function RovingIndexGroup({
     return itemIndex === currentIndex ? 0 : -1;
   };
 
+  const focusNextItem = () => {
+    const nextIndex = (currentIndex + 1) % registeredItems.current.length;
+    setCurrentIndex(nextIndex);
+
+    const nextItem = registeredItems.current[nextIndex];
+    const nextItemElement = groupRef.current?.querySelector(
+      `[data-roving-index-item="${nextItem}"]`,
+    );
+
+    if (nextItemElement) {
+      (nextItemElement as HTMLElement).focus();
+    }
+  };
+
   const contextValue: RovingIndexContextType = {
     currentIndex,
     setCurrentIndex,
     registerItem,
     unregisterItem,
     getTabIndex,
+    focusNextItem,
   };
 
   return (
