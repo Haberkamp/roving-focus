@@ -422,3 +422,24 @@ it("renders as a button using the as prop", async () => {
     .element(screen.getByText("Item 1"))
     .toHaveAttribute("tabindex", "-1");
 });
+
+it("prefers asChild over as prop", async () => {
+  // ARRANGE
+  const screen = await render(
+    <RovingIndexGroup>
+      <RovingIndexItem asChild as="button">
+        <a href="https://www.google.com">Item 1</a>
+      </RovingIndexItem>
+    </RovingIndexGroup>,
+  );
+
+  // ASSERT
+  await expect
+    .element(screen.getByText("Item 1"))
+    .toBeInstanceOf(HTMLAnchorElement);
+
+  expect(screen.getByText("Item 1")).toHaveAttribute(
+    "href",
+    "https://www.google.com",
+  );
+});
