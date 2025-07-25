@@ -392,3 +392,33 @@ it("renders as a button using the asChild prop", async () => {
     .element(screen.getByText("Item 1"))
     .toHaveAttribute("tabindex", "-1");
 });
+
+it("renders as a button using the as prop", async () => {
+  // ARRANGE
+  const screen = await render(
+    <RovingIndexGroup>
+      <RovingIndexItem>Item 1</RovingIndexItem>
+
+      <RovingIndexItem as="button">Item 2</RovingIndexItem>
+    </RovingIndexGroup>,
+  );
+
+  await userEvent.tab();
+
+  // ACT
+  await userEvent.keyboard("{ArrowRight}");
+
+  // ASSERT
+  await expect
+    .element(screen.getByRole("button", { name: "Item 2" }))
+    .toHaveFocus();
+
+  await expect
+    .element(screen.getByRole("button", { name: "Item 2" }))
+    .toHaveAttribute("tabindex", "0");
+
+  await expect.element(screen.getByText("Item 1")).not.toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 1"))
+    .toHaveAttribute("tabindex", "-1");
+});

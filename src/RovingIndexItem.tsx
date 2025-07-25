@@ -10,11 +10,13 @@ import { Slot } from "@radix-ui/react-slot";
 
 export type RovingIndexItemProps = {
   asChild?: boolean;
+  as?: React.ElementType;
 } & ComponentPropsWithoutRef<"span">;
 
 export function RovingIndexItem({
   onFocus,
   asChild = false,
+  as = "span",
   ...props
 }: RovingIndexItemProps) {
   const id = useId();
@@ -59,7 +61,7 @@ export function RovingIndexItem({
     }
   };
 
-  const Component = asChild ? Slot : "span";
+  const Component = asChild ? Slot : as;
 
   return (
     <Component
