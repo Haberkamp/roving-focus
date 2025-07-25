@@ -1,12 +1,12 @@
-import { render, screen } from "@testing-library/react";
-import { userEvent } from "@testing-library/user-event";
-import { it, expect } from "vitest";
+import { render } from "vitest-browser-react";
+import { expect, it } from "vitest";
 import { RovingIndexGroup } from "./RovingIndexGroup";
 import { RovingIndexItem } from "./RovingIndexItem";
+import { userEvent } from "@testing-library/user-event";
 
 it("focuses the first item when pressing tab", async () => {
   // ARRANGE
-  render(
+  const screen = await render(
     <RovingIndexGroup>
       <RovingIndexItem>Item 1</RovingIndexItem>
       <RovingIndexItem>Item 2</RovingIndexItem>
@@ -18,12 +18,12 @@ it("focuses the first item when pressing tab", async () => {
   await userEvent.tab();
 
   // ASSERT
-  expect(screen.getByText("Item 1")).toHaveFocus();
+  await expect.element(screen.getByText("Item 1")).toHaveFocus();
 });
 
 it("focuses the next item outside the group when pressing tab", async () => {
   // ARRANGE
-  render(
+  const screen = await render(
     <div>
       <RovingIndexGroup>
         <RovingIndexItem>Item 1</RovingIndexItem>
@@ -40,19 +40,19 @@ it("focuses the next item outside the group when pressing tab", async () => {
   await userEvent.tab();
 
   // ASSERT
-  expect(screen.getByText("Outside")).toHaveFocus();
+  await expect.element(screen.getByText("Outside")).toHaveFocus();
 });
 
 it("re-focuses the first item when pressing Shift + Tab", async () => {
   // ARRANGE
-  render(
+  const screen = await render(
     <div>
       <RovingIndexGroup>
         <RovingIndexItem>Item 1</RovingIndexItem>
         <RovingIndexItem>Item 2</RovingIndexItem>
         <RovingIndexItem>Item 3</RovingIndexItem>
       </RovingIndexGroup>
-      ,<button>Outside</button>
+      <button>Outside</button>
     </div>,
   );
 
@@ -65,12 +65,12 @@ it("re-focuses the first item when pressing Shift + Tab", async () => {
   });
 
   // ASSERT
-  expect(screen.getByText("Item 1")).toHaveFocus();
+  await expect.element(screen.getByText("Item 1")).toHaveFocus();
 });
 
 it("focuses the next item when pressing the right arrow key", async () => {
   // ARRANGE
-  render(
+  const screen = await render(
     <RovingIndexGroup>
       <RovingIndexItem>Item 1</RovingIndexItem>
       <RovingIndexItem>Item 2</RovingIndexItem>
@@ -84,5 +84,5 @@ it("focuses the next item when pressing the right arrow key", async () => {
   await userEvent.keyboard("{ArrowRight}");
 
   // ASSERT
-  expect(screen.getByText("Item 2")).toHaveFocus();
+  await expect.element(screen.getByText("Item 2")).toHaveFocus();
 });

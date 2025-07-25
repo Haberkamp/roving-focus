@@ -1,8 +1,4 @@
 // Test setup file for Vitest
-import "@testing-library/jest-dom/vitest";
-import { cleanup } from "@testing-library/react";
-import { afterEach } from "vitest";
+import "@vitest/browser/matchers";
 
-afterEach(() => {
-  cleanup();
-});
+import "vitest-browser-react";
