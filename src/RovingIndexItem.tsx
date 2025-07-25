@@ -11,8 +11,13 @@ export type RovingIndexItemProps = {} & ComponentPropsWithoutRef<"span">;
 
 export function RovingIndexItem({ onFocus, ...props }: RovingIndexItemProps) {
   const id = useId();
-  const { registerItem, unregisterItem, getTabIndex, focusNextItem } =
-    useRovingIndex();
+  const {
+    registerItem,
+    unregisterItem,
+    getTabIndex,
+    focusNextItem,
+    focusPreviousItem,
+  } = useRovingIndex();
 
   useEffect(() => {
     registerItem(id);
@@ -30,6 +35,10 @@ export function RovingIndexItem({ onFocus, ...props }: RovingIndexItemProps) {
   const handleKeyDown = (event: KeyboardEvent<HTMLSpanElement>) => {
     if (event.key === "ArrowRight") {
       focusNextItem();
+    }
+
+    if (event.key === "ArrowLeft") {
+      focusPreviousItem();
     }
   };
 
