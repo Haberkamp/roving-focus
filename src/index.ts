@@ -1,1 +1,2 @@
-export { Button, type ButtonProps } from "./Button";
+export { RovingIndexGroup } from "./RovingIndexGroup";
+export { RovingIndexItem } from "./RovingIndexItem";
