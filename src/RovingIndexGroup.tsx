@@ -57,21 +57,6 @@ export function RovingIndexGroup({
     return itemIndex === currentIndex ? 0 : -1;
   };
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === "Tab" && !event.shiftKey) {
-      // If we're focused on an item in this group, let the tab move to next element outside
-      const activeElement = document.activeElement;
-      const groupElement = groupRef.current;
-
-      if (groupElement && groupElement.contains(activeElement)) {
-        // We're already focused on an item, let tab move outside the group
-        return;
-      }
-    }
-
-    onKeyDown?.(event);
-  };
-
   const contextValue: RovingIndexContextType = {
     currentIndex,
     setCurrentIndex,
@@ -82,7 +67,7 @@ export function RovingIndexGroup({
 
   return (
     <RovingIndexContext.Provider value={contextValue}>
-      <div ref={groupRef} onKeyDown={handleKeyDown} {...props} />
+      <div ref={groupRef} {...props} />
     </RovingIndexContext.Provider>
   );
 }
