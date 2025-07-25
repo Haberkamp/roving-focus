@@ -26,20 +26,17 @@ npm install
 ## Usage
 
 ```tsx
-import { Button } from 'dummy-react-package'
+import { Button } from "dummy-react-package";
 
 function App() {
-  return (
-    <Button onClick={() => console.log('clicked!')}>
-      Click me
-    </Button>
-  )
+  return <Button onClick={() => console.log("clicked!")}>Click me</Button>;
 }
 ```
 
 ## Development
 
 This package includes:
+
 - A sample `Button` component with TypeScript interfaces
 - Comprehensive test suite using Vitest and Testing Library
 - TypeScript configuration optimized for React development

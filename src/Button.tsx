@@ -1,16 +1,16 @@
-import React from 'react'
+import React from "react";
 
 export interface ButtonProps {
-  children: React.ReactNode
-  onClick?: () => void
-  variant?: 'primary' | 'secondary'
-  disabled?: boolean
+  children: React.ReactNode;
+  onClick?: () => void;
+  variant?: "primary" | "secondary";
+  disabled?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
   children,
   onClick,
-  variant = 'primary',
+  variant = "primary",
   disabled = false,
 }) => {
   return (
@@ -22,5 +22,5 @@ export const Button: React.FC<ButtonProps> = ({
     >
       {children}
     </button>
-  )
-}
+  );
+};
