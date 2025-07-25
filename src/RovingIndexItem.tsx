@@ -42,7 +42,7 @@ export function RovingIndexItem({ onFocus, ...props }: RovingIndexItemProps) {
       focusPreviousItem();
     }
 
-    if (event.key === "PageDown") {
+    if (event.key === "PageDown" || event.key === "End") {
       focusLastItem();
     }
   };

@@ -291,34 +291,37 @@ it("stops at the first item when pressing the left arrow key on the first item a
     .toHaveAttribute("tabindex", "-1");
 });
 
-it("focuses the last item when pressing the PageDown key", async () => {
-  // ARRANGE
-  const screen = await render(
-    <RovingIndexGroup>
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem>Item 2</RovingIndexItem>
-      <RovingIndexItem>Item 3</RovingIndexItem>
-    </RovingIndexGroup>,
-  );
+it.each(["PageDown", "End"])(
+  "focuses the last item when pressing the %s key",
+  async (key) => {
+    // ARRANGE
+    const screen = await render(
+      <RovingIndexGroup>
+        <RovingIndexItem>Item 1</RovingIndexItem>
+        <RovingIndexItem>Item 2</RovingIndexItem>
+        <RovingIndexItem>Item 3</RovingIndexItem>
+      </RovingIndexGroup>,
+    );
 
-  await userEvent.tab();
+    await userEvent.tab();
 
-  // ACT
-  await userEvent.keyboard("{PageDown}");
+    // ACT
+    await userEvent.keyboard(`{${key}}`);
 
-  // ASSERT
-  await expect.element(screen.getByText("Item 3")).toHaveFocus();
-  await expect
-    .element(screen.getByText("Item 3"))
-    .toHaveAttribute("tabindex", "0");
+    // ASSERT
+    await expect.element(screen.getByText("Item 3")).toHaveFocus();
+    await expect
+      .element(screen.getByText("Item 3"))
+      .toHaveAttribute("tabindex", "0");
 
-  await expect.element(screen.getByText("Item 1")).not.toHaveFocus();
-  await expect
-    .element(screen.getByText("Item 1"))
-    .toHaveAttribute("tabindex", "-1");
+    await expect.element(screen.getByText("Item 1")).not.toHaveFocus();
+    await expect
+      .element(screen.getByText("Item 1"))
+      .toHaveAttribute("tabindex", "-1");
 
-  await expect.element(screen.getByText("Item 2")).not.toHaveFocus();
-  await expect
-    .element(screen.getByText("Item 2"))
-    .toHaveAttribute("tabindex", "-1");
-});
+    await expect.element(screen.getByText("Item 2")).not.toHaveFocus();
+    await expect
+      .element(screen.getByText("Item 2"))
+      .toHaveAttribute("tabindex", "-1");
+  },
+);
