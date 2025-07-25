@@ -26,10 +26,13 @@ export const useRovingIndex = () => {
   return context;
 };
 
-export type RovingIndexGroupProps = {} & ComponentPropsWithoutRef<"div">;
+export type RovingIndexGroupProps = {
+  loop?: boolean;
+} & ComponentPropsWithoutRef<"div">;
 
 export function RovingIndexGroup({
   onKeyDown,
+  loop = true,
   ...props
 }: RovingIndexGroupProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -55,7 +58,9 @@ export function RovingIndexGroup({
   };
 
   const focusNextItem = () => {
-    const nextIndex = (currentIndex + 1) % registeredItems.current.length;
+    const nextIndex = loop
+      ? (currentIndex + 1) % registeredItems.current.length
+      : Math.min(currentIndex + 1, registeredItems.current.length - 1);
     setCurrentIndex(nextIndex);
 
     const nextItem = registeredItems.current[nextIndex];
@@ -69,9 +74,10 @@ export function RovingIndexGroup({
   };
 
   const focusPreviousItem = () => {
-    const previousIndex =
-      (currentIndex - 1 + registeredItems.current.length) %
-      registeredItems.current.length;
+    const previousIndex = loop
+      ? (currentIndex - 1 + registeredItems.current.length) %
+        registeredItems.current.length
+      : Math.max(currentIndex - 1, 0);
     setCurrentIndex(previousIndex);
 
     const previousItem = registeredItems.current[previousIndex];
