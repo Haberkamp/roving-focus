@@ -20,3 +20,25 @@ it("focuses the first item when pressing tab", async () => {
   // ASSERT
   expect(screen.getByText("Item 1")).toHaveFocus();
 });
+
+it("focuses the next item outside the group when pressing tab", async () => {
+  // ARRANGE
+  render(
+    <div>
+      <RovingIndexGroup>
+        <RovingIndexItem>Item 1</RovingIndexItem>
+        <RovingIndexItem>Item 2</RovingIndexItem>
+        <RovingIndexItem>Item 3</RovingIndexItem>
+      </RovingIndexGroup>
+
+      <button>Outside</button>
+    </div>,
+  );
+
+  // ACT
+  await userEvent.tab();
+  await userEvent.tab();
+
+  // ASSERT
+  expect(screen.getByText("Outside")).toHaveFocus();
+});
