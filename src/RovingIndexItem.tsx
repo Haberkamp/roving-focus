@@ -1,15 +1,15 @@
-import { ComponentPropsWithoutRef, useEffect, useId, FocusEvent } from "react";
+import { ComponentPropsWithoutRef, useEffect, useId } from "react";
 import { useRovingIndex } from "./RovingIndexGroup";
 
 export type RovingIndexItemProps = {} & ComponentPropsWithoutRef<"span">;
 
 export function RovingIndexItem({ onFocus, ...props }: RovingIndexItemProps) {
   const id = useId();
-  const { registerItem, unregisterItem, getTabIndex, setCurrentIndex } =
-    useRovingIndex();
+  const { registerItem, unregisterItem, getTabIndex } = useRovingIndex();
 
   useEffect(() => {
-    const itemIndex = registerItem(id);
+    registerItem(id);
+
     return () => {
       unregisterItem(id);
     };
@@ -18,10 +18,5 @@ export function RovingIndexItem({ onFocus, ...props }: RovingIndexItemProps) {
   const itemIndex = registerItem(id);
   const tabIndex = getTabIndex(itemIndex);
 
-  const handleFocus = (event: FocusEvent<HTMLSpanElement>) => {
-    setCurrentIndex(itemIndex);
-    onFocus?.(event);
-  };
-
-  return <span tabIndex={tabIndex} onFocus={handleFocus} {...props} />;
+  return <span tabIndex={tabIndex} {...props} />;
 }
