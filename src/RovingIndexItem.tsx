@@ -44,11 +44,11 @@ export function RovingIndexItem({
   const ref = useRef<HTMLSpanElement>(null);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLSpanElement>) => {
-    if (event.key === "ArrowRight") {
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
       focusNextItem();
     }
 
-    if (event.key === "ArrowLeft") {
+    if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
       focusPreviousItem();
     }
 

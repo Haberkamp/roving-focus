@@ -30,11 +30,13 @@ export const useRovingIndex = () => {
 
 export type RovingIndexGroupProps = {
   loop?: boolean;
+  orientation?: "horizontal" | "vertical";
 } & ComponentPropsWithoutRef<"div">;
 
 export function RovingIndexGroup({
   onKeyDown,
   loop = true,
+  orientation = "horizontal",
   ...props
 }: RovingIndexGroupProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
