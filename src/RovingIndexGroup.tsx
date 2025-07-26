@@ -16,6 +16,7 @@ type RovingIndexContextType = {
   focusPreviousItem: () => void;
   focusLastItem: () => void;
   focusFirstItem: () => void;
+  orientation: "horizontal" | "vertical";
 };
 
 const RovingIndexContext = createContext<RovingIndexContextType | null>(null);
@@ -131,6 +132,7 @@ export function RovingIndexGroup({
     focusPreviousItem,
     focusLastItem,
     focusFirstItem,
+    orientation,
   };
 
   return (

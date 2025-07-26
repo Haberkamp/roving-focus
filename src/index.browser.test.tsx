@@ -514,3 +514,134 @@ it("focuses the next item when pressing the Arrow Down key and orientation is ve
     .element(screen.getByText("Item 3"))
     .toHaveAttribute("tabindex", "-1");
 });
+
+it("is not possible to focus the next item with the Right Arrow key and orientation is vertical", async () => {
+  // ARRANGE
+  const screen = await render(
+    <RovingIndexGroup
+      orientation="vertical"
+      style={{ display: "flex", flexDirection: "column" }}
+    >
+      <RovingIndexItem>Item 1</RovingIndexItem>
+      <RovingIndexItem>Item 2</RovingIndexItem>
+    </RovingIndexGroup>,
+  );
+
+  await userEvent.tab();
+
+  // ACT
+  await userEvent.keyboard("{ArrowRight}");
+
+  // ASSERT
+  await expect.element(screen.getByText("Item 1")).toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 1"))
+    .toHaveAttribute("tabindex", "0");
+
+  await expect.element(screen.getByText("Item 2")).not.toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 2"))
+    .toHaveAttribute("tabindex", "-1");
+});
+
+it("is not possible to focus the previous item with the Left Arrow key and orientation is vertical", async () => {
+  // ARRANGE
+  const screen = await render(
+    <RovingIndexGroup
+      orientation="vertical"
+      style={{ display: "flex", flexDirection: "column" }}
+    >
+      <RovingIndexItem>Item 1</RovingIndexItem>
+      <RovingIndexItem>Item 2</RovingIndexItem>
+    </RovingIndexGroup>,
+  );
+
+  await userEvent.tab();
+  await userEvent.keyboard("{ArrowDown}");
+
+  // ACT
+  await userEvent.keyboard("{ArrowLeft}");
+
+  // ASSERT
+  await expect.element(screen.getByText("Item 1")).not.toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 1"))
+    .toHaveAttribute("tabindex", "-1");
+
+  await expect.element(screen.getByText("Item 2")).toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 2"))
+    .toHaveAttribute("tabindex", "0");
+});
+
+it("is not possible to focus the next item with the right arrow key when the orientation is vertical", async () => {
+  // ARRANGE
+  const screen = await render(
+    <RovingIndexGroup
+      orientation="vertical"
+      style={{ display: "flex", flexDirection: "column" }}
+    >
+      <RovingIndexItem>Item 1</RovingIndexItem>
+      <RovingIndexItem>Item 2</RovingIndexItem>
+      <RovingIndexItem>Item 3</RovingIndexItem>
+    </RovingIndexGroup>,
+  );
+
+  await userEvent.tab();
+  await userEvent.keyboard("{ArrowDown}");
+
+  // ACT
+  await userEvent.keyboard("{ArrowRight}");
+
+  // ASSERT
+  await expect.element(screen.getByText("Item 2")).toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 2"))
+    .toHaveAttribute("tabindex", "0");
+
+  await expect.element(screen.getByText("Item 1")).not.toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 1"))
+    .toHaveAttribute("tabindex", "-1");
+
+  await expect.element(screen.getByText("Item 3")).not.toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 3"))
+    .toHaveAttribute("tabindex", "-1");
+});
+
+it("is not possible to focus the previous item with the left arrow key when the orientation is vertical", async () => {
+  // ARRANGE
+  const screen = await render(
+    <RovingIndexGroup
+      orientation="vertical"
+      style={{ display: "flex", flexDirection: "column" }}
+    >
+      <RovingIndexItem>Item 1</RovingIndexItem>
+      <RovingIndexItem>Item 2</RovingIndexItem>
+      <RovingIndexItem>Item 3</RovingIndexItem>
+    </RovingIndexGroup>,
+  );
+
+  await userEvent.tab();
+  await userEvent.keyboard("{ArrowDown}");
+
+  // ACT
+  await userEvent.keyboard("{ArrowLeft}");
+
+  // ASSERT
+  await expect.element(screen.getByText("Item 2")).toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 2"))
+    .toHaveAttribute("tabindex", "0");
+
+  await expect.element(screen.getByText("Item 1")).not.toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 1"))
+    .toHaveAttribute("tabindex", "-1");
+
+  await expect.element(screen.getByText("Item 3")).not.toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 3"))
+    .toHaveAttribute("tabindex", "-1");
+});
