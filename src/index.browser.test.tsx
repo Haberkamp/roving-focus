@@ -645,3 +645,41 @@ it("is not possible to focus the previous item with the left arrow key when the 
     .element(screen.getByText("Item 3"))
     .toHaveAttribute("tabindex", "-1");
 });
+
+it.each([["horizontal", "vertical"] as const])(
+  'adds a data-orientation="%s" attribute to the group when the orientation is %s',
+  async (orientation) => {
+    // ARRANGE
+    const screen = await render(
+      <RovingIndexGroup
+        orientation={orientation}
+        style={{ display: "flex", flexDirection: "row" }}
+      >
+        <RovingIndexItem>Item 1</RovingIndexItem>
+        <RovingIndexItem>Item 2</RovingIndexItem>
+      </RovingIndexGroup>,
+    );
+
+    // ASSERT
+    await expect(screen.getByTestId("roving-index-group")).toHaveAttribute(
+      "data-orientation",
+      orientation,
+    );
+  },
+);
+
+it('adds a data-orientation="horizontal" attribute to the group when no orientation is provided', async () => {
+  // ARRANGE
+  const screen = await render(
+    <RovingIndexGroup>
+      <RovingIndexItem>Item 1</RovingIndexItem>
+      <RovingIndexItem>Item 2</RovingIndexItem>
+    </RovingIndexGroup>,
+  );
+
+  // ASSERT
+  await expect(screen.getByTestId("roving-index-group")).toHaveAttribute(
+    "data-orientation",
+    "horizontal",
+  );
+});

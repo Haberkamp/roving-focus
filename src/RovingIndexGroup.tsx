@@ -137,7 +137,12 @@ export function RovingIndexGroup({
 
   return (
     <RovingIndexContext.Provider value={contextValue}>
-      <div ref={groupRef} {...props} />
+      <div
+        ref={groupRef}
+        data-orientation={orientation}
+        data-testid="roving-index-group"
+        {...props}
+      />
     </RovingIndexContext.Provider>
   );
 }
