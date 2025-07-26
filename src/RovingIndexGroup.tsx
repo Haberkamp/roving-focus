@@ -1,3 +1,4 @@
+import { Slot } from "@radix-ui/react-slot";
 import {
   ComponentPropsWithoutRef,
   createContext,
@@ -33,9 +34,11 @@ export type RovingIndexGroupProps = {
   loop?: boolean;
   orientation?: "horizontal" | "vertical";
   as?: React.ElementType;
+  asChild?: boolean;
 } & ComponentPropsWithoutRef<"div">;
 
 export function RovingIndexGroup({
+  asChild = false,
   onKeyDown,
   loop = true,
   orientation = "horizontal",
@@ -137,7 +140,7 @@ export function RovingIndexGroup({
     orientation,
   };
 
-  const Component = as;
+  const Component = asChild ? Slot : as;
 
   return (
     <RovingIndexContext.Provider value={contextValue}>

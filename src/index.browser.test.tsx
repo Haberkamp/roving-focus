@@ -737,3 +737,37 @@ it("renders the group as a span when using the as prop", async () => {
     .element(screen.getByTestId("roving-index-group"))
     .toBeInstanceOf(HTMLSpanElement);
 });
+
+it("renders the group as a span when using the asChild prop", async () => {
+  // ARRANGE
+  const screen = await render(
+    <RovingIndexGroup asChild>
+      <span>
+        <RovingIndexItem>Item 1</RovingIndexItem>
+        <RovingIndexItem>Item 2</RovingIndexItem>
+      </span>
+    </RovingIndexGroup>,
+  );
+
+  // ASSERT
+  await expect
+    .element(screen.getByTestId("roving-index-group"))
+    .toBeInstanceOf(HTMLSpanElement);
+});
+
+it("prefers the asChild prop over the as prop for the group component", async () => {
+  // ARRANGE
+  const screen = await render(
+    <RovingIndexGroup as="span" asChild>
+      <div>
+        <RovingIndexItem>Item 1</RovingIndexItem>
+        <RovingIndexItem>Item 2</RovingIndexItem>
+      </div>
+    </RovingIndexGroup>,
+  );
+
+  // ASSERT
+  await expect
+    .element(screen.getByTestId("roving-index-group"))
+    .toBeInstanceOf(HTMLDivElement);
+});
