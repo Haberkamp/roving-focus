@@ -11,12 +11,14 @@ import { Slot } from "@radix-ui/react-slot";
 export type RovingIndexItemProps = {
   asChild?: boolean;
   as?: React.ElementType;
+  focusable?: boolean;
 } & ComponentPropsWithoutRef<"span">;
 
 export function RovingIndexItem({
   onFocus,
   asChild = false,
   as = "span",
+  focusable = true,
   ...props
 }: RovingIndexItemProps) {
   const id = useId();
@@ -32,14 +34,14 @@ export function RovingIndexItem({
   } = useRovingIndex();
 
   useEffect(() => {
-    registerItem(id);
+    registerItem(id, focusable);
 
     return () => {
       unregisterItem(id);
     };
-  }, [id, registerItem, unregisterItem]);
+  }, [id, focusable, registerItem, unregisterItem]);
 
-  const itemIndex = registerItem(id);
+  const itemIndex = registerItem(id, focusable);
   const tabIndex = getTabIndex(itemIndex);
 
   const ref = useRef<HTMLSpanElement>(null);
@@ -79,6 +81,7 @@ export function RovingIndexItem({
       ref={ref}
       data-roving-index-item={id}
       data-orientation={orientation}
+      data-disabled={focusable ? undefined : "true"}
       tabIndex={tabIndex}
       onKeyDown={handleKeyDown}
       {...props}

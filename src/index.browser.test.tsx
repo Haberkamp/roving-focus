@@ -771,3 +771,52 @@ it("prefers the asChild prop over the as prop for the group component", async ()
     .element(screen.getByTestId("roving-index-group"))
     .toBeInstanceOf(HTMLDivElement);
 });
+
+it("skips the unfocusable items until it reaches the next focusable item", async () => {
+  // ARRANGE
+  const screen = await render(
+    <RovingIndexGroup>
+      <RovingIndexItem>Item 1</RovingIndexItem>
+      <RovingIndexItem focusable={false}>Item 2</RovingIndexItem>
+      <RovingIndexItem>Item 3</RovingIndexItem>
+    </RovingIndexGroup>,
+  );
+
+  await userEvent.tab();
+
+  // ACT
+  await userEvent.keyboard("{ArrowRight}");
+
+  // ASSERT
+  await expect(screen.getByText("Item 3")).toHaveFocus();
+
+  await expect(screen.getByText("Item 2")).not.toHaveFocus();
+  await expect(screen.getByText("Item 1")).not.toHaveFocus();
+});
+
+it('adds a data-disabled="true" attribute the unfocusable items', async () => {
+  // ARRANGE
+  const screen = await render(
+    <RovingIndexGroup>
+      <RovingIndexItem focusable={false}>Item 1</RovingIndexItem>
+    </RovingIndexGroup>,
+  );
+
+  // ASSERT
+  await expect(screen.getByText("Item 1")).toHaveAttribute(
+    "data-disabled",
+    "true",
+  );
+});
+
+it("does not add a data-disabled attribute to focusable items", async () => {
+  // ARRANGE
+  const screen = await render(
+    <RovingIndexGroup>
+      <RovingIndexItem focusable={true}>Item 1</RovingIndexItem>
+    </RovingIndexGroup>,
+  );
+
+  // ASSERT
+  await expect(screen.getByText("Item 1")).not.toHaveAttribute("data-disabled");
+});
