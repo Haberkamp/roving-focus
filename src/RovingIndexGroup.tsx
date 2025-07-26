@@ -32,12 +32,14 @@ export const useRovingIndex = () => {
 export type RovingIndexGroupProps = {
   loop?: boolean;
   orientation?: "horizontal" | "vertical";
+  as?: React.ElementType;
 } & ComponentPropsWithoutRef<"div">;
 
 export function RovingIndexGroup({
   onKeyDown,
   loop = true,
   orientation = "horizontal",
+  as = "div",
   ...props
 }: RovingIndexGroupProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -135,9 +137,11 @@ export function RovingIndexGroup({
     orientation,
   };
 
+  const Component = as;
+
   return (
     <RovingIndexContext.Provider value={contextValue}>
-      <div
+      <Component
         ref={groupRef}
         data-orientation={orientation}
         data-testid="roving-index-group"

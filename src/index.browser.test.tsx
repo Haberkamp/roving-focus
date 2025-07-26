@@ -707,3 +707,33 @@ it.each([["horizontal", "vertical"] as const])(
     );
   },
 );
+
+it("renders the group as a div by default", async () => {
+  // ARRANGE
+  const screen = await render(
+    <RovingIndexGroup>
+      <RovingIndexItem>Item 1</RovingIndexItem>
+      <RovingIndexItem>Item 2</RovingIndexItem>
+    </RovingIndexGroup>,
+  );
+
+  // ASSERT
+  await expect
+    .element(screen.getByTestId("roving-index-group"))
+    .toBeInstanceOf(HTMLDivElement);
+});
+
+it("renders the group as a span when using the as prop", async () => {
+  // ARRANGE
+  const screen = await render(
+    <RovingIndexGroup as="span">
+      <RovingIndexItem>Item 1</RovingIndexItem>
+      <RovingIndexItem>Item 2</RovingIndexItem>
+    </RovingIndexGroup>,
+  );
+
+  // ASSERT
+  await expect
+    .element(screen.getByTestId("roving-index-group"))
+    .toBeInstanceOf(HTMLSpanElement);
+});
