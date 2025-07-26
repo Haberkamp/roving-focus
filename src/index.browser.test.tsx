@@ -683,3 +683,27 @@ it('adds a data-orientation="horizontal" attribute to the group when no orientat
     "horizontal",
   );
 });
+
+it.each([["horizontal", "vertical"] as const])(
+  'adds data-orientation="%s" to every single child',
+  async (orientation) => {
+    // ARRANGE
+    const screen = await render(
+      <RovingIndexGroup orientation={orientation}>
+        <RovingIndexItem>Item 1</RovingIndexItem>
+        <RovingIndexItem>Item 2</RovingIndexItem>
+      </RovingIndexGroup>,
+    );
+
+    // ASSERT
+    await expect(screen.getByText("Item 1")).toHaveAttribute(
+      "data-orientation",
+      orientation,
+    );
+
+    await expect(screen.getByText("Item 2")).toHaveAttribute(
+      "data-orientation",
+      orientation,
+    );
+  },
+);

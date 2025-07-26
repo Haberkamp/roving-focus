@@ -78,6 +78,7 @@ export function RovingIndexItem({
     <Component
       ref={ref}
       data-roving-index-item={id}
+      data-orientation={orientation}
       tabIndex={tabIndex}
       onKeyDown={handleKeyDown}
       {...props}
