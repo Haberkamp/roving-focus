@@ -661,10 +661,9 @@ it.each([["horizontal", "vertical"] as const])(
     );
 
     // ASSERT
-    await expect(screen.getByTestId("roving-index-group")).toHaveAttribute(
-      "data-orientation",
-      orientation,
-    );
+    await expect
+      .element(screen.getByTestId("roving-index-group"))
+      .toHaveAttribute("data-orientation", orientation);
   },
 );
 
@@ -678,10 +677,9 @@ it('adds a data-orientation="horizontal" attribute to the group when no orientat
   );
 
   // ASSERT
-  await expect(screen.getByTestId("roving-index-group")).toHaveAttribute(
-    "data-orientation",
-    "horizontal",
-  );
+  await expect
+    .element(screen.getByTestId("roving-index-group"))
+    .toHaveAttribute("data-orientation", "horizontal");
 });
 
 it.each([["horizontal", "vertical"] as const])(
@@ -696,15 +694,13 @@ it.each([["horizontal", "vertical"] as const])(
     );
 
     // ASSERT
-    await expect(screen.getByText("Item 1")).toHaveAttribute(
-      "data-orientation",
-      orientation,
-    );
+    await expect
+      .element(screen.getByText("Item 1"))
+      .toHaveAttribute("data-orientation", orientation);
 
-    await expect(screen.getByText("Item 2")).toHaveAttribute(
-      "data-orientation",
-      orientation,
-    );
+    await expect
+      .element(screen.getByText("Item 2"))
+      .toHaveAttribute("data-orientation", orientation);
   },
 );
 
@@ -788,10 +784,10 @@ it("skips the unfocusable items until it reaches the next focusable item", async
   await userEvent.keyboard("{ArrowRight}");
 
   // ASSERT
-  await expect(screen.getByText("Item 3")).toHaveFocus();
+  await expect.element(screen.getByText("Item 3")).toHaveFocus();
 
-  await expect(screen.getByText("Item 2")).not.toHaveFocus();
-  await expect(screen.getByText("Item 1")).not.toHaveFocus();
+  await expect.element(screen.getByText("Item 2")).not.toHaveFocus();
+  await expect.element(screen.getByText("Item 1")).not.toHaveFocus();
 });
 
 it('adds a data-disabled="true" attribute the unfocusable items', async () => {
@@ -803,10 +799,9 @@ it('adds a data-disabled="true" attribute the unfocusable items', async () => {
   );
 
   // ASSERT
-  await expect(screen.getByText("Item 1")).toHaveAttribute(
-    "data-disabled",
-    "true",
-  );
+  await expect
+    .element(screen.getByText("Item 1"))
+    .toHaveAttribute("data-disabled", "true");
 });
 
 it("does not add a data-disabled attribute to focusable items", async () => {
@@ -818,7 +813,9 @@ it("does not add a data-disabled attribute to focusable items", async () => {
   );
 
   // ASSERT
-  await expect(screen.getByText("Item 1")).not.toHaveAttribute("data-disabled");
+  await expect
+    .element(screen.getByText("Item 1"))
+    .not.toHaveAttribute("data-disabled");
 });
 
 it("focuses the last focusable item when pressing the End key", async () => {
