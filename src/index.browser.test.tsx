@@ -893,3 +893,10 @@ it("focuses the next item when pressing the right arrow key after the clicked on
     .element(screen.getByText("Item 1"))
     .toHaveAttribute("tabindex", "-1");
 });
+
+it("throws an error when using the RovingIndexItem outside of a RovingIndexGroup", async () => {
+  // ARRANGE
+  expect(() => {
+    render(<RovingIndexItem>Item 1</RovingIndexItem>);
+  }).toThrow("useRovingIndex must be used within a RovingIndexGroup");
+});
