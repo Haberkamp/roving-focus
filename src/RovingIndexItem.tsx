@@ -68,11 +68,11 @@ export function RovingIndexItem({
       }
     }
 
-    if (event.key === "PageDown" || event.key === "End") {
+    if (["PageDown", "End"].includes(event.key)) {
       focusLastItem();
     }
 
-    if (event.key === "PageUp" || event.key === "Home") {
+    if (["PageUp", "Home"].includes(event.key)) {
       focusFirstItem();
     }
   };
