@@ -864,3 +864,35 @@ it("focuses the first focusable item when pressing the Home key", async () => {
   await expect.element(screen.getByText("Item 1")).not.toHaveFocus();
   await expect.element(screen.getByText("Item 3")).not.toHaveFocus();
 });
+
+it("focuses the next item when pressing the right arrow key after the clicked on an item that is not the first item", async () => {
+  // ARRANGE
+  const screen = render(
+    <RovingIndexGroup>
+      <RovingIndexItem>Item 1</RovingIndexItem>
+      <RovingIndexItem>Item 2</RovingIndexItem>
+      <RovingIndexItem>Item 3</RovingIndexItem>
+    </RovingIndexGroup>,
+  );
+
+  // ACT
+  await screen.getByText("Item 2").click();
+
+  await userEvent.keyboard("{ArrowRight}");
+
+  // ASSERT
+  await expect.element(screen.getByText("Item 3")).toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 3"))
+    .toHaveAttribute("tabindex", "0");
+
+  await expect.element(screen.getByText("Item 2")).not.toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 2"))
+    .toHaveAttribute("tabindex", "-1");
+
+  await expect.element(screen.getByText("Item 1")).not.toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 1"))
+    .toHaveAttribute("tabindex", "-1");
+});

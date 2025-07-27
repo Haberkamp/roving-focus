@@ -4,6 +4,7 @@ import {
   useId,
   KeyboardEvent,
   useRef,
+  MouseEvent,
 } from "react";
 import { useRovingIndex } from "./RovingIndexGroup";
 import { Slot } from "@radix-ui/react-slot";
@@ -16,6 +17,7 @@ export type RovingIndexItemProps = {
 
 export function RovingIndexItem({
   onFocus,
+  onClick,
   asChild = false,
   as = "span",
   focusable = true,
@@ -26,6 +28,7 @@ export function RovingIndexItem({
     registerItem,
     unregisterItem,
     getTabIndex,
+    setCurrentIndex,
     focusNextItem,
     focusPreviousItem,
     focusLastItem,
@@ -74,6 +77,16 @@ export function RovingIndexItem({
     }
   };
 
+  const handleClick = (event: MouseEvent<HTMLSpanElement>) => {
+    if (focusable) {
+      setCurrentIndex(itemIndex);
+    }
+
+    if (onClick) {
+      onClick(event);
+    }
+  };
+
   const Component = asChild ? Slot : as;
 
   return (
@@ -84,6 +97,7 @@ export function RovingIndexItem({
       data-disabled={focusable ? undefined : "true"}
       tabIndex={tabIndex}
       onKeyDown={handleKeyDown}
+      onClick={handleClick}
       {...props}
     />
   );
