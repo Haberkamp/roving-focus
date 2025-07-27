@@ -49,17 +49,9 @@ export function RovingIndexItem({
     return () => {
       unregisterItem(id);
     };
-  }, [
-    id,
-    focusable,
-    active,
-    registerItem,
-    unregisterItem,
-    setDefaultActiveItem,
-  ]);
+  }, [id, focusable, active]);
 
-  const itemIndex = registerItem(id, focusable);
-  const tabIndex = getTabIndex(itemIndex);
+  const tabIndex = getTabIndex(registerItem(id, focusable));
 
   const ref = useRef<HTMLSpanElement>(null);
 
@@ -92,7 +84,7 @@ export function RovingIndexItem({
   };
 
   const handleClick = (event: MouseEvent<HTMLSpanElement>) => {
-    if (focusable) setCurrentIndex(itemIndex);
+    if (focusable) setCurrentIndex(registerItem(id, focusable));
 
     onClick?.(event);
   };

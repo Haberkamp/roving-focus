@@ -50,6 +50,7 @@ export function RovingIndexGroup({
   const [currentIndex, setCurrentIndex] = useState(-1);
   const registeredItems = useRef<Array<{ id: string; focusable: boolean }>>([]);
   const groupRef = useRef<HTMLDivElement>(null);
+  const hasDefaultActiveItem = useRef(false);
 
   const findFirstFocusableIndex = (): number => {
     for (let i = 0; i < registeredItems.current.length; i++) {
@@ -90,7 +91,11 @@ export function RovingIndexGroup({
 
   // Update currentIndex when items are registered and currentIndex is -1
   useEffect(() => {
-    if (currentIndex === -1 && registeredItems.current.length > 0) {
+    if (
+      currentIndex === -1 &&
+      registeredItems.current.length > 0 &&
+      !hasDefaultActiveItem.current
+    ) {
       const firstFocusableIndex = findFirstFocusableIndex();
       if (firstFocusableIndex !== -1) {
         setCurrentIndex(firstFocusableIndex);
@@ -197,6 +202,40 @@ export function RovingIndexGroup({
   };
 
   const setDefaultActiveItem = (index: number) => {
+    hasDefaultActiveItem.current = true;
+    const item = registeredItems.current[index];
+
+    if (item && !item.focusable) {
+      console.warn(
+        "The default active item is unfocusable. This is not recommended.",
+      );
+
+      // Find the next focusable item after the given index
+      for (let i = index + 1; i < registeredItems.current.length; i++) {
+        const nextItem = registeredItems.current[i];
+        if (nextItem && nextItem.focusable) {
+          setCurrentIndex(i);
+          return;
+        }
+      }
+
+      // If no focusable item found after, look before the given index
+      for (let i = index - 1; i >= 0; i--) {
+        const prevItem = registeredItems.current[i];
+        if (prevItem && prevItem.focusable) {
+          setCurrentIndex(i);
+          return;
+        }
+      }
+
+      // If still no focusable item found, find the first focusable item
+      const firstFocusableIndex = findFirstFocusableIndex();
+      if (firstFocusableIndex !== -1) {
+        setCurrentIndex(firstFocusableIndex);
+        return;
+      }
+    }
+
     setCurrentIndex(index);
   };
 

@@ -1,8 +1,10 @@
 import { render } from "vitest-browser-react";
-import { expect, it } from "vitest";
+import { afterEach, expect, it, vi } from "vitest";
 import { RovingIndexGroup } from "./RovingIndexGroup";
 import { RovingIndexItem } from "./RovingIndexItem";
 import { userEvent } from "@vitest/browser/context";
+
+afterEach(() => vi.restoreAllMocks());
 
 it("focuses the first item when pressing tab", async () => {
   // ARRANGE
@@ -941,4 +943,54 @@ it("adds a data-active attribute to the default active item", async () => {
   await expect
     .element(screen.getByText("Item 2"))
     .not.toHaveAttribute("data-active");
+});
+
+it("logs a message to the console when the default active item is unfocusable", async () => {
+  // ARRANGE
+  const consoleWarnSpy = vi.spyOn(console, "warn");
+
+  render(
+    <RovingIndexGroup>
+      <RovingIndexItem focusable={false} active>
+        Item 1
+      </RovingIndexItem>
+    </RovingIndexGroup>,
+  );
+
+  // ASSERT
+  expect(consoleWarnSpy).toHaveBeenCalledWith(
+    "The default active item is unfocusable. This is not recommended.",
+  );
+});
+
+it("focuses the next focusable item when the default active item is unfocusable", async () => {
+  // ARRANGE
+  const screen = render(
+    <RovingIndexGroup>
+      <RovingIndexItem>Item 1</RovingIndexItem>
+      <RovingIndexItem focusable={false} active>
+        Item 2
+      </RovingIndexItem>
+      <RovingIndexItem>Item 3</RovingIndexItem>
+    </RovingIndexGroup>,
+  );
+
+  // ACT
+  await userEvent.tab();
+
+  // ASSERT
+  await expect.element(screen.getByText("Item 3")).toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 3"))
+    .toHaveAttribute("tabindex", "0");
+
+  await expect.element(screen.getByText("Item 1")).not.toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 1"))
+    .toHaveAttribute("tabindex", "-1");
+
+  await expect.element(screen.getByText("Item 2")).not.toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 2"))
+    .toHaveAttribute("tabindex", "-1");
 });
