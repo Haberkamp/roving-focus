@@ -820,3 +820,47 @@ it("does not add a data-disabled attribute to focusable items", async () => {
   // ASSERT
   await expect(screen.getByText("Item 1")).not.toHaveAttribute("data-disabled");
 });
+
+it("focuses the last focusable item when pressing the End key", async () => {
+  // ARRANGE
+  const screen = await render(
+    <RovingIndexGroup>
+      <RovingIndexItem>Item 1</RovingIndexItem>
+      <RovingIndexItem>Item 2</RovingIndexItem>
+      <RovingIndexItem focusable={false}>Item 3</RovingIndexItem>
+    </RovingIndexGroup>,
+  );
+
+  await userEvent.tab();
+
+  // ACT
+  await userEvent.keyboard("{End}");
+
+  // ASSERT
+  await expect.element(screen.getByText("Item 2")).toHaveFocus();
+
+  await expect.element(screen.getByText("Item 1")).not.toHaveFocus();
+  await expect.element(screen.getByText("Item 3")).not.toHaveFocus();
+});
+
+it("focuses the first focusable item when pressing the Home key", async () => {
+  // ARRANGE
+  const screen = await render(
+    <RovingIndexGroup>
+      <RovingIndexItem focusable={false}>Item 1</RovingIndexItem>
+      <RovingIndexItem>Item 2</RovingIndexItem>
+      <RovingIndexItem>Item 3</RovingIndexItem>
+    </RovingIndexGroup>,
+  );
+
+  await userEvent.tab();
+
+  // ACT
+  await userEvent.keyboard("{Home}");
+
+  // ASSERT
+  await expect.element(screen.getByText("Item 2")).toHaveFocus();
+
+  await expect.element(screen.getByText("Item 1")).not.toHaveFocus();
+  await expect.element(screen.getByText("Item 3")).not.toHaveFocus();
+});

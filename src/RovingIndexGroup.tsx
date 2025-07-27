@@ -5,6 +5,7 @@ import {
   useContext,
   useState,
   useRef,
+  useEffect,
 } from "react";
 
 type RovingIndexContextType = {
@@ -45,9 +46,19 @@ export function RovingIndexGroup({
   as = "div",
   ...props
 }: RovingIndexGroupProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(-1);
   const registeredItems = useRef<Array<{ id: string; focusable: boolean }>>([]);
   const groupRef = useRef<HTMLDivElement>(null);
+
+  const findFirstFocusableIndex = (): number => {
+    for (let i = 0; i < registeredItems.current.length; i++) {
+      const item = registeredItems.current[i];
+      if (item && item.focusable) {
+        return i;
+      }
+    }
+    return -1;
+  };
 
   const registerItem = (id: string, focusable: boolean = true): number => {
     const existingIndex = registeredItems.current.findIndex(
@@ -76,12 +87,27 @@ export function RovingIndexGroup({
     return itemIndex === currentIndex ? 0 : -1;
   };
 
+  // Update currentIndex when items are registered and currentIndex is -1
+  useEffect(() => {
+    if (currentIndex === -1 && registeredItems.current.length > 0) {
+      const firstFocusableIndex = findFirstFocusableIndex();
+      if (firstFocusableIndex !== -1) {
+        setCurrentIndex(firstFocusableIndex);
+      }
+    }
+  }, [currentIndex]);
+
   const getNextFocusableIndex = (
     startIndex: number,
     direction: 1 | -1,
   ): number => {
     const length = registeredItems.current.length;
     if (length === 0) return startIndex;
+
+    // If startIndex is -1, find the first focusable item
+    if (startIndex === -1) {
+      return findFirstFocusableIndex();
+    }
 
     let index = startIndex;
     let attempts = 0;
