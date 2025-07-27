@@ -1,2 +1,5 @@
-export { RovingFocusGroup } from "./RovingFocusGroup";
-export { RovingFocusItem } from "./RovingFocusItem";
+export {
+  RovingFocusGroup,
+  type RovingFocusGroupProps,
+} from "./RovingFocusGroup";
+export { RovingFocusItem, type RovingFocusItemProps } from "./RovingFocusItem";
