@@ -2,7 +2,7 @@ import { render } from "vitest-browser-react";
 import { expect, it } from "vitest";
 import { RovingIndexGroup } from "./RovingIndexGroup";
 import { RovingIndexItem } from "./RovingIndexItem";
-import { userEvent } from "@testing-library/user-event";
+import { userEvent } from "@vitest/browser/context";
 
 it("focuses the first item when pressing tab", async () => {
   // ARRANGE
