@@ -82,9 +82,7 @@ export function RovingIndexItem({
       setCurrentIndex(itemIndex);
     }
 
-    if (onClick) {
-      onClick(event);
-    }
+    onClick?.(event);
   };
 
   const Component = asChild ? Slot : as;
