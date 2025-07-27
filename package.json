@@ -1,7 +1,7 @@
 {
-  "name": "dummy-react-package",
+  "name": "@roving-focus/react",
   "version": "1.0.0",
-  "description": "A dummy React package with TypeScript and Vitest",
+  "description": "A roving focus component for React.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
