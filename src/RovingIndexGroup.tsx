@@ -19,6 +19,7 @@ type RovingIndexContextType = {
   focusLastItem: () => void;
   focusFirstItem: () => void;
   orientation: "horizontal" | "vertical";
+  setDefaultActiveItem: (index: number) => void;
 };
 
 const RovingIndexContext = createContext<RovingIndexContextType | null>(null);
@@ -195,6 +196,10 @@ export function RovingIndexGroup({
     }
   };
 
+  const setDefaultActiveItem = (index: number) => {
+    setCurrentIndex(index);
+  };
+
   const contextValue: RovingIndexContextType = {
     currentIndex,
     setCurrentIndex,
@@ -206,6 +211,7 @@ export function RovingIndexGroup({
     focusLastItem,
     focusFirstItem,
     orientation,
+    setDefaultActiveItem,
   };
 
   const Component = asChild ? Slot : as;

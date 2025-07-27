@@ -13,6 +13,7 @@ export type RovingIndexItemProps = {
   asChild?: boolean;
   as?: React.ElementType;
   focusable?: boolean;
+  active?: boolean;
 } & ComponentPropsWithoutRef<"span">;
 
 export function RovingIndexItem({
@@ -21,6 +22,7 @@ export function RovingIndexItem({
   asChild = false,
   as = "span",
   focusable = true,
+  active = false,
   ...props
 }: RovingIndexItemProps) {
   const id = useId();
@@ -34,15 +36,27 @@ export function RovingIndexItem({
     focusLastItem,
     focusFirstItem,
     orientation,
+    setDefaultActiveItem,
   } = useRovingIndex();
 
   useEffect(() => {
-    registerItem(id, focusable);
+    const itemIndex = registerItem(id, focusable);
+
+    if (active) {
+      setDefaultActiveItem(itemIndex);
+    }
 
     return () => {
       unregisterItem(id);
     };
-  }, [id, focusable, registerItem, unregisterItem]);
+  }, [
+    id,
+    focusable,
+    active,
+    registerItem,
+    unregisterItem,
+    setDefaultActiveItem,
+  ]);
 
   const itemIndex = registerItem(id, focusable);
   const tabIndex = getTabIndex(itemIndex);
@@ -91,6 +105,7 @@ export function RovingIndexItem({
       data-roving-index-item={id}
       data-orientation={orientation}
       data-disabled={focusable ? undefined : "true"}
+      data-active={active ? "true" : undefined}
       tabIndex={tabIndex}
       onKeyDown={handleKeyDown}
       onClick={handleClick}

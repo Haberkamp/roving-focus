@@ -900,3 +900,45 @@ it("throws an error when using the RovingIndexItem outside of a RovingIndexGroup
     render(<RovingIndexItem>Item 1</RovingIndexItem>);
   }).toThrow("useRovingIndex must be used within a RovingIndexGroup");
 });
+
+it("focuses the item which is marked as the defaul active item", async () => {
+  // ARRANGE
+  const screen = render(
+    <RovingIndexGroup>
+      <RovingIndexItem>Item 1</RovingIndexItem>
+      <RovingIndexItem active>Item 2</RovingIndexItem>
+    </RovingIndexGroup>,
+  );
+
+  // ASSERT
+  await userEvent.tab();
+
+  await expect.element(screen.getByText("Item 2")).toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 2"))
+    .toHaveAttribute("tabindex", "0");
+
+  await expect.element(screen.getByText("Item 1")).not.toHaveFocus();
+  await expect
+    .element(screen.getByText("Item 1"))
+    .toHaveAttribute("tabindex", "-1");
+});
+
+it("adds a data-active attribute to the default active item", async () => {
+  // ARRANGE
+  const screen = render(
+    <RovingIndexGroup>
+      <RovingIndexItem active>Item 1</RovingIndexItem>
+      <RovingIndexItem>Item 2</RovingIndexItem>
+    </RovingIndexGroup>,
+  );
+
+  // ASSERT
+  await expect
+    .element(screen.getByText("Item 1"))
+    .toHaveAttribute("data-active", "true");
+
+  await expect
+    .element(screen.getByText("Item 2"))
+    .not.toHaveAttribute("data-active");
+});
