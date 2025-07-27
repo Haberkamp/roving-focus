@@ -6,17 +6,17 @@ import {
   useRef,
   MouseEvent,
 } from "react";
-import { useRovingIndex } from "./RovingIndexGroup";
+import { useRovingFocus } from "./RovingFocusGroup";
 import { Slot } from "@radix-ui/react-slot";
 
-export type RovingIndexItemProps = {
+export type RovingFocusItemProps = {
   asChild?: boolean;
   as?: React.ElementType;
   focusable?: boolean;
   active?: boolean;
 } & ComponentPropsWithoutRef<"span">;
 
-export function RovingIndexItem({
+export function RovingFocusItem({
   onFocus,
   onClick,
   asChild = false,
@@ -24,7 +24,7 @@ export function RovingIndexItem({
   focusable = true,
   active = false,
   ...props
-}: RovingIndexItemProps) {
+}: RovingFocusItemProps) {
   const id = useId();
   const {
     registerItem,
@@ -37,7 +37,7 @@ export function RovingIndexItem({
     focusFirstItem,
     orientation,
     setDefaultActiveItem,
-  } = useRovingIndex();
+  } = useRovingFocus();
 
   useEffect(() => {
     const itemIndex = registerItem(id, focusable);
@@ -94,7 +94,7 @@ export function RovingIndexItem({
   return (
     <Component
       ref={ref}
-      data-roving-index-item={id}
+      data-roving-focus-item={id}
       data-orientation={orientation}
       data-disabled={focusable ? undefined : "true"}
       data-active={active ? "true" : undefined}

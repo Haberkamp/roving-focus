@@ -1,7 +1,7 @@
 import { render } from "vitest-browser-react";
 import { afterEach, expect, it, vi } from "vitest";
-import { RovingIndexGroup } from "./RovingIndexGroup";
-import { RovingIndexItem } from "./RovingIndexItem";
+import { RovingFocusGroup } from "./RovingFocusGroup";
+import { RovingFocusItem } from "./RovingFocusItem";
 import { userEvent } from "@vitest/browser/context";
 
 afterEach(() => vi.restoreAllMocks());
@@ -9,11 +9,11 @@ afterEach(() => vi.restoreAllMocks());
 it("focuses the first item when pressing tab", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup>
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem>Item 2</RovingIndexItem>
-      <RovingIndexItem>Item 3</RovingIndexItem>
-    </RovingIndexGroup>,
+    <RovingFocusGroup>
+      <RovingFocusItem>Item 1</RovingFocusItem>
+      <RovingFocusItem>Item 2</RovingFocusItem>
+      <RovingFocusItem>Item 3</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   // ACT
@@ -27,11 +27,11 @@ it("focuses the next item outside the group when pressing tab", async () => {
   // ARRANGE
   const screen = await render(
     <div>
-      <RovingIndexGroup>
-        <RovingIndexItem>Item 1</RovingIndexItem>
-        <RovingIndexItem>Item 2</RovingIndexItem>
-        <RovingIndexItem>Item 3</RovingIndexItem>
-      </RovingIndexGroup>
+      <RovingFocusGroup>
+        <RovingFocusItem>Item 1</RovingFocusItem>
+        <RovingFocusItem>Item 2</RovingFocusItem>
+        <RovingFocusItem>Item 3</RovingFocusItem>
+      </RovingFocusGroup>
 
       <button>Outside</button>
     </div>,
@@ -49,11 +49,11 @@ it("re-focuses the first item when pressing Shift + Tab", async () => {
   // ARRANGE
   const screen = await render(
     <div>
-      <RovingIndexGroup>
-        <RovingIndexItem>Item 1</RovingIndexItem>
-        <RovingIndexItem>Item 2</RovingIndexItem>
-        <RovingIndexItem>Item 3</RovingIndexItem>
-      </RovingIndexGroup>
+      <RovingFocusGroup>
+        <RovingFocusItem>Item 1</RovingFocusItem>
+        <RovingFocusItem>Item 2</RovingFocusItem>
+        <RovingFocusItem>Item 3</RovingFocusItem>
+      </RovingFocusGroup>
       <button>Outside</button>
     </div>,
   );
@@ -73,11 +73,11 @@ it("re-focuses the first item when pressing Shift + Tab", async () => {
 it("focuses the next item when pressing the right arrow key", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup>
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem>Item 2</RovingIndexItem>
-      <RovingIndexItem>Item 3</RovingIndexItem>
-    </RovingIndexGroup>,
+    <RovingFocusGroup>
+      <RovingFocusItem>Item 1</RovingFocusItem>
+      <RovingFocusItem>Item 2</RovingFocusItem>
+      <RovingFocusItem>Item 3</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   await userEvent.tab();
@@ -105,11 +105,11 @@ it("focuses the next item when pressing the right arrow key", async () => {
 it("focuses the third item when pressing the right arrow key on the second item", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup>
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem>Item 2</RovingIndexItem>
-      <RovingIndexItem>Item 3</RovingIndexItem>
-    </RovingIndexGroup>,
+    <RovingFocusGroup>
+      <RovingFocusItem>Item 1</RovingFocusItem>
+      <RovingFocusItem>Item 2</RovingFocusItem>
+      <RovingFocusItem>Item 3</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   await userEvent.tab();
@@ -125,10 +125,10 @@ it("focuses the third item when pressing the right arrow key on the second item"
 it("focuses the last item when pressing the right arrow key on the second item", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup>
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem>Item 2</RovingIndexItem>
-    </RovingIndexGroup>,
+    <RovingFocusGroup>
+      <RovingFocusItem>Item 1</RovingFocusItem>
+      <RovingFocusItem>Item 2</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   await userEvent.tab();
@@ -152,11 +152,11 @@ it("focuses the last item when pressing the right arrow key on the second item",
 it("focues the previous item when pressing the left arrow key", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup>
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem>Item 2</RovingIndexItem>
-      <RovingIndexItem>Item 3</RovingIndexItem>
-    </RovingIndexGroup>,
+    <RovingFocusGroup>
+      <RovingFocusItem>Item 1</RovingFocusItem>
+      <RovingFocusItem>Item 2</RovingFocusItem>
+      <RovingFocusItem>Item 3</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   await userEvent.tab();
@@ -185,10 +185,10 @@ it("focues the previous item when pressing the left arrow key", async () => {
 it("focuses the last item when pressing the left arrow key on the first item", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup>
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem>Item 2</RovingIndexItem>
-    </RovingIndexGroup>,
+    <RovingFocusGroup>
+      <RovingFocusItem>Item 1</RovingFocusItem>
+      <RovingFocusItem>Item 2</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   await userEvent.tab();
@@ -210,10 +210,10 @@ it("focuses back to the last selected item when pressing Shift + Tab", async () 
   // ARRANGE
   const screen = await render(
     <div>
-      <RovingIndexGroup>
-        <RovingIndexItem>Item 1</RovingIndexItem>
-        <RovingIndexItem>Item 2</RovingIndexItem>
-      </RovingIndexGroup>
+      <RovingFocusGroup>
+        <RovingFocusItem>Item 1</RovingFocusItem>
+        <RovingFocusItem>Item 2</RovingFocusItem>
+      </RovingFocusGroup>
 
       <button>Outside</button>
     </div>,
@@ -243,10 +243,10 @@ it("focuses back to the last selected item when pressing Shift + Tab", async () 
 it("stops at the last item when pressing the right arrow key on the last item and loop is disabled", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup loop={false}>
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem>Item 2</RovingIndexItem>
-    </RovingIndexGroup>,
+    <RovingFocusGroup loop={false}>
+      <RovingFocusItem>Item 1</RovingFocusItem>
+      <RovingFocusItem>Item 2</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   await userEvent.tab();
@@ -270,10 +270,10 @@ it("stops at the last item when pressing the right arrow key on the last item an
 it("stops at the first item when pressing the left arrow key on the first item and loop is disabled", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup loop={false}>
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem>Item 2</RovingIndexItem>
-    </RovingIndexGroup>,
+    <RovingFocusGroup loop={false}>
+      <RovingFocusItem>Item 1</RovingFocusItem>
+      <RovingFocusItem>Item 2</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   await userEvent.tab();
@@ -298,11 +298,11 @@ it.each(["PageDown", "End"])(
   async (key) => {
     // ARRANGE
     const screen = await render(
-      <RovingIndexGroup>
-        <RovingIndexItem>Item 1</RovingIndexItem>
-        <RovingIndexItem>Item 2</RovingIndexItem>
-        <RovingIndexItem>Item 3</RovingIndexItem>
-      </RovingIndexGroup>,
+      <RovingFocusGroup>
+        <RovingFocusItem>Item 1</RovingFocusItem>
+        <RovingFocusItem>Item 2</RovingFocusItem>
+        <RovingFocusItem>Item 3</RovingFocusItem>
+      </RovingFocusGroup>,
     );
 
     await userEvent.tab();
@@ -333,11 +333,11 @@ it.each(["PageUp", "Home"])(
   async (key) => {
     // ARRANGE
     const screen = await render(
-      <RovingIndexGroup>
-        <RovingIndexItem>Item 1</RovingIndexItem>
-        <RovingIndexItem>Item 2</RovingIndexItem>
-        <RovingIndexItem>Item 3</RovingIndexItem>
-      </RovingIndexGroup>,
+      <RovingFocusGroup>
+        <RovingFocusItem>Item 1</RovingFocusItem>
+        <RovingFocusItem>Item 2</RovingFocusItem>
+        <RovingFocusItem>Item 3</RovingFocusItem>
+      </RovingFocusGroup>,
     );
 
     await userEvent.tab();
@@ -367,13 +367,13 @@ it.each(["PageUp", "Home"])(
 it("renders as a button using the asChild prop", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup>
-      <RovingIndexItem>Item 1</RovingIndexItem>
+    <RovingFocusGroup>
+      <RovingFocusItem>Item 1</RovingFocusItem>
 
-      <RovingIndexItem asChild>
+      <RovingFocusItem asChild>
         <button>Item 2</button>
-      </RovingIndexItem>
-    </RovingIndexGroup>,
+      </RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   // ACT
@@ -398,11 +398,11 @@ it("renders as a button using the asChild prop", async () => {
 it("renders as a button using the as prop", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup>
-      <RovingIndexItem>Item 1</RovingIndexItem>
+    <RovingFocusGroup>
+      <RovingFocusItem>Item 1</RovingFocusItem>
 
-      <RovingIndexItem as="button">Item 2</RovingIndexItem>
-    </RovingIndexGroup>,
+      <RovingFocusItem as="button">Item 2</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   await userEvent.tab();
@@ -428,11 +428,11 @@ it("renders as a button using the as prop", async () => {
 it("prefers asChild over as prop", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup>
-      <RovingIndexItem asChild as="button">
+    <RovingFocusGroup>
+      <RovingFocusItem asChild as="button">
         <a href="https://www.google.com">Item 1</a>
-      </RovingIndexItem>
-    </RovingIndexGroup>,
+      </RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   // ASSERT
@@ -449,14 +449,14 @@ it("prefers asChild over as prop", async () => {
 it("focuses the previous item when pressing the Arrow Up key and orientation is vertical", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup
+    <RovingFocusGroup
       orientation="vertical"
       style={{ display: "flex", flexDirection: "column" }}
     >
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem>Item 2</RovingIndexItem>
-      <RovingIndexItem>Item 3</RovingIndexItem>
-    </RovingIndexGroup>,
+      <RovingFocusItem>Item 1</RovingFocusItem>
+      <RovingFocusItem>Item 2</RovingFocusItem>
+      <RovingFocusItem>Item 3</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   await userEvent.tab();
@@ -485,14 +485,14 @@ it("focuses the previous item when pressing the Arrow Up key and orientation is 
 it("focuses the next item when pressing the Arrow Down key and orientation is vertical", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup
+    <RovingFocusGroup
       orientation="vertical"
       style={{ display: "flex", flexDirection: "column" }}
     >
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem>Item 2</RovingIndexItem>
-      <RovingIndexItem>Item 3</RovingIndexItem>
-    </RovingIndexGroup>,
+      <RovingFocusItem>Item 1</RovingFocusItem>
+      <RovingFocusItem>Item 2</RovingFocusItem>
+      <RovingFocusItem>Item 3</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   await userEvent.tab();
@@ -520,13 +520,13 @@ it("focuses the next item when pressing the Arrow Down key and orientation is ve
 it("is not possible to focus the next item with the Right Arrow key and orientation is vertical", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup
+    <RovingFocusGroup
       orientation="vertical"
       style={{ display: "flex", flexDirection: "column" }}
     >
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem>Item 2</RovingIndexItem>
-    </RovingIndexGroup>,
+      <RovingFocusItem>Item 1</RovingFocusItem>
+      <RovingFocusItem>Item 2</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   await userEvent.tab();
@@ -549,13 +549,13 @@ it("is not possible to focus the next item with the Right Arrow key and orientat
 it("is not possible to focus the previous item with the Left Arrow key and orientation is vertical", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup
+    <RovingFocusGroup
       orientation="vertical"
       style={{ display: "flex", flexDirection: "column" }}
     >
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem>Item 2</RovingIndexItem>
-    </RovingIndexGroup>,
+      <RovingFocusItem>Item 1</RovingFocusItem>
+      <RovingFocusItem>Item 2</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   await userEvent.tab();
@@ -579,14 +579,14 @@ it("is not possible to focus the previous item with the Left Arrow key and orien
 it("is not possible to focus the next item with the right arrow key when the orientation is vertical", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup
+    <RovingFocusGroup
       orientation="vertical"
       style={{ display: "flex", flexDirection: "column" }}
     >
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem>Item 2</RovingIndexItem>
-      <RovingIndexItem>Item 3</RovingIndexItem>
-    </RovingIndexGroup>,
+      <RovingFocusItem>Item 1</RovingFocusItem>
+      <RovingFocusItem>Item 2</RovingFocusItem>
+      <RovingFocusItem>Item 3</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   await userEvent.tab();
@@ -615,14 +615,14 @@ it("is not possible to focus the next item with the right arrow key when the ori
 it("is not possible to focus the previous item with the left arrow key when the orientation is vertical", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup
+    <RovingFocusGroup
       orientation="vertical"
       style={{ display: "flex", flexDirection: "column" }}
     >
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem>Item 2</RovingIndexItem>
-      <RovingIndexItem>Item 3</RovingIndexItem>
-    </RovingIndexGroup>,
+      <RovingFocusItem>Item 1</RovingFocusItem>
+      <RovingFocusItem>Item 2</RovingFocusItem>
+      <RovingFocusItem>Item 3</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   await userEvent.tab();
@@ -653,18 +653,18 @@ it.each([["horizontal", "vertical"] as const])(
   async (orientation) => {
     // ARRANGE
     const screen = await render(
-      <RovingIndexGroup
+      <RovingFocusGroup
         orientation={orientation}
         style={{ display: "flex", flexDirection: "row" }}
       >
-        <RovingIndexItem>Item 1</RovingIndexItem>
-        <RovingIndexItem>Item 2</RovingIndexItem>
-      </RovingIndexGroup>,
+        <RovingFocusItem>Item 1</RovingFocusItem>
+        <RovingFocusItem>Item 2</RovingFocusItem>
+      </RovingFocusGroup>,
     );
 
     // ASSERT
     await expect
-      .element(screen.getByTestId("roving-index-group"))
+      .element(screen.getByTestId("roving-focus-group"))
       .toHaveAttribute("data-orientation", orientation);
   },
 );
@@ -672,15 +672,15 @@ it.each([["horizontal", "vertical"] as const])(
 it('adds a data-orientation="horizontal" attribute to the group when no orientation is provided', async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup>
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem>Item 2</RovingIndexItem>
-    </RovingIndexGroup>,
+    <RovingFocusGroup>
+      <RovingFocusItem>Item 1</RovingFocusItem>
+      <RovingFocusItem>Item 2</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   // ASSERT
   await expect
-    .element(screen.getByTestId("roving-index-group"))
+    .element(screen.getByTestId("roving-focus-group"))
     .toHaveAttribute("data-orientation", "horizontal");
 });
 
@@ -689,10 +689,10 @@ it.each([["horizontal", "vertical"] as const])(
   async (orientation) => {
     // ARRANGE
     const screen = await render(
-      <RovingIndexGroup orientation={orientation}>
-        <RovingIndexItem>Item 1</RovingIndexItem>
-        <RovingIndexItem>Item 2</RovingIndexItem>
-      </RovingIndexGroup>,
+      <RovingFocusGroup orientation={orientation}>
+        <RovingFocusItem>Item 1</RovingFocusItem>
+        <RovingFocusItem>Item 2</RovingFocusItem>
+      </RovingFocusGroup>,
     );
 
     // ASSERT
@@ -709,75 +709,75 @@ it.each([["horizontal", "vertical"] as const])(
 it("renders the group as a div by default", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup>
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem>Item 2</RovingIndexItem>
-    </RovingIndexGroup>,
+    <RovingFocusGroup>
+      <RovingFocusItem>Item 1</RovingFocusItem>
+      <RovingFocusItem>Item 2</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   // ASSERT
   await expect
-    .element(screen.getByTestId("roving-index-group"))
+    .element(screen.getByTestId("roving-focus-group"))
     .toBeInstanceOf(HTMLDivElement);
 });
 
 it("renders the group as a span when using the as prop", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup as="span">
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem>Item 2</RovingIndexItem>
-    </RovingIndexGroup>,
+    <RovingFocusGroup as="span">
+      <RovingFocusItem>Item 1</RovingFocusItem>
+      <RovingFocusItem>Item 2</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   // ASSERT
   await expect
-    .element(screen.getByTestId("roving-index-group"))
+    .element(screen.getByTestId("roving-focus-group"))
     .toBeInstanceOf(HTMLSpanElement);
 });
 
 it("renders the group as a span when using the asChild prop", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup asChild>
+    <RovingFocusGroup asChild>
       <span>
-        <RovingIndexItem>Item 1</RovingIndexItem>
-        <RovingIndexItem>Item 2</RovingIndexItem>
+        <RovingFocusItem>Item 1</RovingFocusItem>
+        <RovingFocusItem>Item 2</RovingFocusItem>
       </span>
-    </RovingIndexGroup>,
+    </RovingFocusGroup>,
   );
 
   // ASSERT
   await expect
-    .element(screen.getByTestId("roving-index-group"))
+    .element(screen.getByTestId("roving-focus-group"))
     .toBeInstanceOf(HTMLSpanElement);
 });
 
 it("prefers the asChild prop over the as prop for the group component", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup as="span" asChild>
+    <RovingFocusGroup as="span" asChild>
       <div>
-        <RovingIndexItem>Item 1</RovingIndexItem>
-        <RovingIndexItem>Item 2</RovingIndexItem>
+        <RovingFocusItem>Item 1</RovingFocusItem>
+        <RovingFocusItem>Item 2</RovingFocusItem>
       </div>
-    </RovingIndexGroup>,
+    </RovingFocusGroup>,
   );
 
   // ASSERT
   await expect
-    .element(screen.getByTestId("roving-index-group"))
+    .element(screen.getByTestId("roving-focus-group"))
     .toBeInstanceOf(HTMLDivElement);
 });
 
 it("skips the unfocusable items until it reaches the next focusable item", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup>
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem focusable={false}>Item 2</RovingIndexItem>
-      <RovingIndexItem>Item 3</RovingIndexItem>
-    </RovingIndexGroup>,
+    <RovingFocusGroup>
+      <RovingFocusItem>Item 1</RovingFocusItem>
+      <RovingFocusItem focusable={false}>Item 2</RovingFocusItem>
+      <RovingFocusItem>Item 3</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   await userEvent.tab();
@@ -795,9 +795,9 @@ it("skips the unfocusable items until it reaches the next focusable item", async
 it('adds a data-disabled="true" attribute the unfocusable items', async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup>
-      <RovingIndexItem focusable={false}>Item 1</RovingIndexItem>
-    </RovingIndexGroup>,
+    <RovingFocusGroup>
+      <RovingFocusItem focusable={false}>Item 1</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   // ASSERT
@@ -809,9 +809,9 @@ it('adds a data-disabled="true" attribute the unfocusable items', async () => {
 it("does not add a data-disabled attribute to focusable items", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup>
-      <RovingIndexItem focusable={true}>Item 1</RovingIndexItem>
-    </RovingIndexGroup>,
+    <RovingFocusGroup>
+      <RovingFocusItem focusable={true}>Item 1</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   // ASSERT
@@ -823,11 +823,11 @@ it("does not add a data-disabled attribute to focusable items", async () => {
 it("focuses the last focusable item when pressing the End key", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup>
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem>Item 2</RovingIndexItem>
-      <RovingIndexItem focusable={false}>Item 3</RovingIndexItem>
-    </RovingIndexGroup>,
+    <RovingFocusGroup>
+      <RovingFocusItem>Item 1</RovingFocusItem>
+      <RovingFocusItem>Item 2</RovingFocusItem>
+      <RovingFocusItem focusable={false}>Item 3</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   await userEvent.tab();
@@ -845,11 +845,11 @@ it("focuses the last focusable item when pressing the End key", async () => {
 it("focuses the first focusable item when pressing the Home key", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingIndexGroup>
-      <RovingIndexItem focusable={false}>Item 1</RovingIndexItem>
-      <RovingIndexItem>Item 2</RovingIndexItem>
-      <RovingIndexItem>Item 3</RovingIndexItem>
-    </RovingIndexGroup>,
+    <RovingFocusGroup>
+      <RovingFocusItem focusable={false}>Item 1</RovingFocusItem>
+      <RovingFocusItem>Item 2</RovingFocusItem>
+      <RovingFocusItem>Item 3</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   await userEvent.tab();
@@ -867,11 +867,11 @@ it("focuses the first focusable item when pressing the Home key", async () => {
 it("focuses the next item when pressing the right arrow key after the clicked on an item that is not the first item", async () => {
   // ARRANGE
   const screen = render(
-    <RovingIndexGroup>
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem>Item 2</RovingIndexItem>
-      <RovingIndexItem>Item 3</RovingIndexItem>
-    </RovingIndexGroup>,
+    <RovingFocusGroup>
+      <RovingFocusItem>Item 1</RovingFocusItem>
+      <RovingFocusItem>Item 2</RovingFocusItem>
+      <RovingFocusItem>Item 3</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   // ACT
@@ -896,20 +896,20 @@ it("focuses the next item when pressing the right arrow key after the clicked on
     .toHaveAttribute("tabindex", "-1");
 });
 
-it("throws an error when using the RovingIndexItem outside of a RovingIndexGroup", async () => {
+it("throws an error when using the RovingFocusItem outside of a RovingFocusGroup", async () => {
   // ARRANGE
   expect(() => {
-    render(<RovingIndexItem>Item 1</RovingIndexItem>);
-  }).toThrow("useRovingIndex must be used within a RovingIndexGroup");
+    render(<RovingFocusItem>Item 1</RovingFocusItem>);
+  }).toThrow("useRovingFocus must be used within a RovingFocusGroup");
 });
 
 it("focuses the item which is marked as the defaul active item", async () => {
   // ARRANGE
   const screen = render(
-    <RovingIndexGroup>
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem active>Item 2</RovingIndexItem>
-    </RovingIndexGroup>,
+    <RovingFocusGroup>
+      <RovingFocusItem>Item 1</RovingFocusItem>
+      <RovingFocusItem active>Item 2</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   // ASSERT
@@ -929,10 +929,10 @@ it("focuses the item which is marked as the defaul active item", async () => {
 it("adds a data-active attribute to the default active item", async () => {
   // ARRANGE
   const screen = render(
-    <RovingIndexGroup>
-      <RovingIndexItem active>Item 1</RovingIndexItem>
-      <RovingIndexItem>Item 2</RovingIndexItem>
-    </RovingIndexGroup>,
+    <RovingFocusGroup>
+      <RovingFocusItem active>Item 1</RovingFocusItem>
+      <RovingFocusItem>Item 2</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   // ASSERT
@@ -950,11 +950,11 @@ it("logs a message to the console when the default active item is unfocusable", 
   const consoleWarnSpy = vi.spyOn(console, "warn");
 
   render(
-    <RovingIndexGroup>
-      <RovingIndexItem focusable={false} active>
+    <RovingFocusGroup>
+      <RovingFocusItem focusable={false} active>
         Item 1
-      </RovingIndexItem>
-    </RovingIndexGroup>,
+      </RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   // ASSERT
@@ -966,13 +966,13 @@ it("logs a message to the console when the default active item is unfocusable", 
 it("focuses the next focusable item when the default active item is unfocusable", async () => {
   // ARRANGE
   const screen = render(
-    <RovingIndexGroup>
-      <RovingIndexItem>Item 1</RovingIndexItem>
-      <RovingIndexItem focusable={false} active>
+    <RovingFocusGroup>
+      <RovingFocusItem>Item 1</RovingFocusItem>
+      <RovingFocusItem focusable={false} active>
         Item 2
-      </RovingIndexItem>
-      <RovingIndexItem>Item 3</RovingIndexItem>
-    </RovingIndexGroup>,
+      </RovingFocusItem>
+      <RovingFocusItem>Item 3</RovingFocusItem>
+    </RovingFocusGroup>,
   );
 
   // ACT

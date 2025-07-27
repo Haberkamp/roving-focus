@@ -8,7 +8,7 @@ import {
   useEffect,
 } from "react";
 
-type RovingIndexContextType = {
+type RovingFocusContextType = {
   currentIndex: number;
   setCurrentIndex: (index: number) => void;
   registerItem: (id: string, focusable?: boolean) => number;
@@ -22,31 +22,31 @@ type RovingIndexContextType = {
   setDefaultActiveItem: (index: number) => void;
 };
 
-const RovingIndexContext = createContext<RovingIndexContextType | null>(null);
+const RovingFocusContext = createContext<RovingFocusContextType | null>(null);
 
-export const useRovingIndex = () => {
-  const context = useContext(RovingIndexContext);
+export const useRovingFocus = () => {
+  const context = useContext(RovingFocusContext);
   if (!context) {
-    throw new Error("useRovingIndex must be used within a RovingIndexGroup");
+    throw new Error("useRovingFocus must be used within a RovingFocusGroup");
   }
   return context;
 };
 
-export type RovingIndexGroupProps = {
+export type RovingFocusGroupProps = {
   loop?: boolean;
   orientation?: "horizontal" | "vertical";
   as?: React.ElementType;
   asChild?: boolean;
 } & ComponentPropsWithoutRef<"div">;
 
-export function RovingIndexGroup({
+export function RovingFocusGroup({
   asChild = false,
   onKeyDown,
   loop = true,
   orientation = "horizontal",
   as = "div",
   ...props
-}: RovingIndexGroupProps) {
+}: RovingFocusGroupProps) {
   const [currentIndex, setCurrentIndex] = useState(-1);
   const registeredItems = useRef<Array<{ id: string; focusable: boolean }>>([]);
   const groupRef = useRef<HTMLDivElement>(null);
@@ -142,7 +142,7 @@ export function RovingIndexGroup({
     const nextItem = registeredItems.current[nextIndex];
     if (nextItem) {
       const nextItemElement = groupRef.current?.querySelector(
-        `[data-roving-index-item="${nextItem.id}"]`,
+        `[data-roving-focus-item="${nextItem.id}"]`,
       );
 
       if (nextItemElement) {
@@ -158,7 +158,7 @@ export function RovingIndexGroup({
     const previousItem = registeredItems.current[previousIndex];
     if (previousItem) {
       const previousItemElement = groupRef.current?.querySelector(
-        `[data-roving-index-item="${previousItem.id}"]`,
+        `[data-roving-focus-item="${previousItem.id}"]`,
       );
 
       if (previousItemElement) {
@@ -174,7 +174,7 @@ export function RovingIndexGroup({
       if (item && item.focusable) {
         setCurrentIndex(i);
         const lastItemElement = groupRef.current?.querySelector(
-          `[data-roving-index-item="${item.id}"]`,
+          `[data-roving-focus-item="${item.id}"]`,
         );
         if (lastItemElement) {
           (lastItemElement as HTMLElement).focus();
@@ -191,7 +191,7 @@ export function RovingIndexGroup({
       if (item && item.focusable) {
         setCurrentIndex(i);
         const firstItemElement = groupRef.current?.querySelector(
-          `[data-roving-index-item="${item.id}"]`,
+          `[data-roving-focus-item="${item.id}"]`,
         );
         if (firstItemElement) {
           (firstItemElement as HTMLElement).focus();
@@ -239,7 +239,7 @@ export function RovingIndexGroup({
     setCurrentIndex(index);
   };
 
-  const contextValue: RovingIndexContextType = {
+  const contextValue: RovingFocusContextType = {
     currentIndex,
     setCurrentIndex,
     registerItem,
@@ -256,13 +256,13 @@ export function RovingIndexGroup({
   const Component = asChild ? Slot : as;
 
   return (
-    <RovingIndexContext.Provider value={contextValue}>
+    <RovingFocusContext.Provider value={contextValue}>
       <Component
         ref={groupRef}
         data-orientation={orientation}
-        data-testid="roving-index-group"
+        data-testid="roving-focus-group"
         {...props}
       />
-    </RovingIndexContext.Provider>
+    </RovingFocusContext.Provider>
   );
 }

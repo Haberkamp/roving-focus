@@ -36,15 +36,15 @@ pnpm add @roving-focus/react
 
 You need two components:
 
-- `RovingIndexGroup`
-- `RovingIndexItem`
+- `RovingFocusGroup`
+- `RovingFocusItem`
 
 ```tsx
-<RovingIndexGroup>
-  <RovingIndexItem>Item 1</RovingIndexItem>
-  <RovingIndexItem>Item 2</RovingIndexItem>
-  <RovingIndexItem>Item 3</RovingIndexItem>
-</RovingIndexGroup>
+<RovingFocusGroup>
+  <RovingFocusItem>Item 1</RovingFocusItem>
+  <RovingFocusItem>Item 2</RovingFocusItem>
+  <RovingFocusItem>Item 3</RovingFocusItem>
+</RovingFocusGroup>
 ```
 
 ### Examples
@@ -52,11 +52,11 @@ You need two components:
 #### Vertical navigation
 
 ```tsx
-<RovingIndexGroup orientation="vertical">
-  <RovingIndexItem>Item 1</RovingIndexItem>
-  <RovingIndexItem>Item 2</RovingIndexItem>
-  <RovingIndexItem>Item 3</RovingIndexItem>
-</RovingIndexGroup>
+<RovingFocusGroup orientation="vertical">
+  <RovingFocusItem>Item 1</RovingFocusItem>
+  <RovingFocusItem>Item 2</RovingFocusItem>
+  <RovingFocusItem>Item 3</RovingFocusItem>
+</RovingFocusGroup>
 ```
 
 Press `ArrowUp` or `ArrowDown` to navigate between items.
@@ -64,11 +64,11 @@ Press `ArrowUp` or `ArrowDown` to navigate between items.
 #### Horizontal navigation
 
 ```tsx
-<RovingIndexGroup orientation="horizontal">
-  <RovingIndexItem>Item 1</RovingIndexItem>
-  <RovingIndexItem>Item 2</RovingIndexItem>
-  <RovingIndexItem>Item 3</RovingIndexItem>
-</RovingIndexGroup>
+<RovingFocusGroup orientation="horizontal">
+  <RovingFocusItem>Item 1</RovingFocusItem>
+  <RovingFocusItem>Item 2</RovingFocusItem>
+  <RovingFocusItem>Item 3</RovingFocusItem>
+</RovingFocusGroup>
 ```
 
 Press `ArrowLeft` or `ArrowRight` to navigate between items.
@@ -78,11 +78,11 @@ Press `ArrowLeft` or `ArrowRight` to navigate between items.
 To make any item unfocusable, set the `focusable` prop to `false`.
 
 ```tsx
-<RovingIndexGroup>
-  <RovingIndexItem focusable={false}>Item 1</RovingIndexItem>
-  <RovingIndexItem>Item 2</RovingIndexItem>
-  <RovingIndexItem>Item 3</RovingIndexItem>
-</RovingIndexGroup>
+<RovingFocusGroup>
+  <RovingFocusItem focusable={false}>Item 1</RovingFocusItem>
+  <RovingFocusItem>Item 2</RovingFocusItem>
+  <RovingFocusItem>Item 3</RovingFocusItem>
+</RovingFocusGroup>
 ```
 
 Now you can only focus item 2 and 3.
@@ -92,10 +92,10 @@ Now you can only focus item 2 and 3.
 By default the first item is focused. To change this, set the `active` prop to `true` on the item you want to be focused by default.
 
 ```tsx
-<RovingIndexGroup>
-  <RovingIndexItem>Item 1</RovingIndexItem>
-  <RovingIndexItem active>Item 2</RovingIndexItem>
-</RovingIndexGroup>
+<RovingFocusGroup>
+  <RovingFocusItem>Item 1</RovingFocusItem>
+  <RovingFocusItem active>Item 2</RovingFocusItem>
+</RovingFocusGroup>
 ```
 
 #### Looping
@@ -105,16 +105,16 @@ When looping is enabled and the user focuses the last item, if they then focus t
 By default looping is enabled. To disable it, set the `loop` prop to `false`.
 
 ```tsx
-<RovingIndexGroup loop={false}>
-  <RovingIndexItem>Item 1</RovingIndexItem>
-  <RovingIndexItem>Item 2</RovingIndexItem>
-  <RovingIndexItem>Item 3</RovingIndexItem>
-</RovingIndexGroup>
+<RovingFocusGroup loop={false}>
+  <RovingFocusItem>Item 1</RovingFocusItem>
+  <RovingFocusItem>Item 2</RovingFocusItem>
+  <RovingFocusItem>Item 3</RovingFocusItem>
+</RovingFocusGroup>
 ```
 
 ### Anatomy
 
-#### RovingIndexGroup
+#### RovingFocusGroup
 
 Props:
 
@@ -127,7 +127,7 @@ Data attributes:
 
 - `data-orientation`: `"vertical" | "horizontal"` - The orientation of the group.
 
-#### RovingIndexItem
+#### RovingFocusItem
 
 Props:
 

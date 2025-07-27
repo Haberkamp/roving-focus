@@ -1,2 +1,2 @@
-export { RovingIndexGroup } from "./RovingIndexGroup";
-export { RovingIndexItem } from "./RovingIndexItem";
+export { RovingFocusGroup } from "./RovingFocusGroup";
+export { RovingFocusItem } from "./RovingFocusItem";
