@@ -78,9 +78,7 @@ export function RovingIndexItem({
   };
 
   const handleClick = (event: MouseEvent<HTMLSpanElement>) => {
-    if (focusable) {
-      setCurrentIndex(itemIndex);
-    }
+    if (focusable) setCurrentIndex(itemIndex);
 
     onClick?.(event);
   };
