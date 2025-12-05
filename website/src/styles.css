@@ -1,1 +1,10 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: Satoshi, sans-serif;
+  --font-mono: "Geist Mono", monospace;
+}
+
+@utility container {
+  @apply mx-auto px-4;
+}
