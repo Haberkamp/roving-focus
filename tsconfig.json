@@ -15,7 +15,8 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "declaration": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "types": ["@vitest/browser/providers/playwright"]
   },
   "include": ["src/**/*", "vitest.setup.ts"],
   "exclude": ["node_modules", "dist"]

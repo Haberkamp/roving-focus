@@ -6,7 +6,7 @@ import {
   useRef,
   MouseEvent,
 } from "react";
-import { useRovingFocus } from "./RovingFocusGroup";
+import { useRovingFocus, GridPosition } from "./RovingFocusGroup";
 import { Slot } from "@radix-ui/react-slot";
 
 export type RovingFocusItemProps = {
@@ -14,6 +14,7 @@ export type RovingFocusItemProps = {
   as?: React.ElementType;
   focusable?: boolean;
   active?: boolean;
+  position?: GridPosition;
 } & ComponentPropsWithoutRef<"span">;
 
 export function RovingFocusItem({
@@ -23,6 +24,7 @@ export function RovingFocusItem({
   as = "span",
   focusable = true,
   active = false,
+  position,
   ...props
 }: RovingFocusItemProps) {
   const id = useId();
@@ -35,12 +37,23 @@ export function RovingFocusItem({
     focusPreviousItem,
     focusLastItem,
     focusFirstItem,
+    focusRight,
+    focusLeft,
+    focusDown,
+    focusUp,
     orientation,
     setDefaultActiveItem,
   } = useRovingFocus();
 
+  // Validate grid position requirement
+  if (orientation === "grid" && !position) {
+    throw new Error(
+      "RovingFocusItem in grid orientation must define a position: { row, column }",
+    );
+  }
+
   useEffect(() => {
-    const itemIndex = registerItem(id, focusable);
+    const itemIndex = registerItem(id, { focusable, position });
 
     if (active) {
       setDefaultActiveItem(itemIndex);
@@ -49,29 +62,24 @@ export function RovingFocusItem({
     return () => {
       unregisterItem(id);
     };
-  }, [id, focusable, active]);
+  }, [id, focusable, active, position?.row, position?.column]);
 
-  const tabIndex = getTabIndex(registerItem(id, focusable));
+  const tabIndex = getTabIndex(registerItem(id, { focusable, position }));
 
   const ref = useRef<HTMLSpanElement>(null);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLSpanElement>) => {
-    if (orientation === "horizontal") {
-      if (event.key === "ArrowRight") {
-        focusNextItem();
-      }
-
-      if (event.key === "ArrowLeft") {
-        focusPreviousItem();
-      }
+    if (orientation === "grid") {
+      if (event.key === "ArrowRight") focusRight();
+      if (event.key === "ArrowLeft") focusLeft();
+      if (event.key === "ArrowDown") focusDown();
+      if (event.key === "ArrowUp") focusUp();
+    } else if (orientation === "horizontal") {
+      if (event.key === "ArrowRight") focusNextItem();
+      if (event.key === "ArrowLeft") focusPreviousItem();
     } else {
-      if (event.key === "ArrowDown") {
-        focusNextItem();
-      }
-
-      if (event.key === "ArrowUp") {
-        focusPreviousItem();
-      }
+      if (event.key === "ArrowDown") focusNextItem();
+      if (event.key === "ArrowUp") focusPreviousItem();
     }
 
     if (["PageDown", "End"].includes(event.key)) {
@@ -84,7 +92,7 @@ export function RovingFocusItem({
   };
 
   const handleClick = (event: MouseEvent<HTMLSpanElement>) => {
-    if (focusable) setCurrentIndex(registerItem(id, focusable));
+    if (focusable) setCurrentIndex(registerItem(id, { focusable, position }));
 
     onClick?.(event);
   };
