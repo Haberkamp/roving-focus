@@ -3,6 +3,7 @@ import "../styles.css";
 import "../font.css";
 
 import { InstallSnippet } from "../components/InstallSnippet";
+import { GridExample } from "../components/GridExample";
 ---
 
 <html lang="en">
@@ -13,9 +14,11 @@ import { InstallSnippet } from "../components/InstallSnippet";
     <meta name="generator" content={Astro.generator} />
     <title>Astro</title>
   </head>
-  <body>
+  <body class="selection:bg-black selection:text-white bg-[#FFFCF5]">
     <div class="container min-h-screen grid place-items-center">
-      <div>
+      <div
+        class="py-48 lg:py-0 grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-32 lg:gap-0 justify-items-center lg:justify-items-start lg:justify-between w-full"
+      >
         <div class="max-w-[410px]">
           <h1 class="text-4xl font-black text-[64px]/[1.1]">Roving Focus</h1>
 
@@ -28,6 +31,10 @@ import { InstallSnippet } from "../components/InstallSnippet";
           <div class="pt-12"></div>
 
           <InstallSnippet className="w-full" client:load />
+        </div>
+
+        <div>
+          <GridExample client:load />
         </div>
       </div>
     </div>
