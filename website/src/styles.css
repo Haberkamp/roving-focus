@@ -20,8 +20,8 @@
   background-color: #fe4a21 !important;
 }
 
-@utility keyboard-only {
+@custom-variant touch {
   @media (hover: none) and (pointer: coarse) {
-    display: none;
+    @slot;
   }
 }
