@@ -8,17 +8,35 @@ import {
   useEffect,
 } from "react";
 
+export type GridPosition = { row: number; column: number };
+
+type RegisterItemOptions = {
+  focusable?: boolean;
+  position?: GridPosition;
+};
+
+type RegisteredItem = {
+  id: string;
+  focusable: boolean;
+  position?: GridPosition;
+};
+
 type RovingFocusContextType = {
   currentIndex: number;
   setCurrentIndex: (index: number) => void;
-  registerItem: (id: string, focusable?: boolean) => number;
+  registerItem: (id: string, options?: RegisterItemOptions) => number;
   unregisterItem: (id: string) => void;
   getTabIndex: (itemIndex: number) => number;
   focusNextItem: () => void;
   focusPreviousItem: () => void;
   focusLastItem: () => void;
   focusFirstItem: () => void;
-  orientation: "horizontal" | "vertical";
+  focusRight: () => void;
+  focusLeft: () => void;
+  focusDown: () => void;
+  focusUp: () => void;
+  orientation: "horizontal" | "vertical" | "grid";
+  loop: boolean;
   setDefaultActiveItem: (index: number) => void;
 };
 
@@ -34,7 +52,7 @@ export const useRovingFocus = () => {
 
 export type RovingFocusGroupProps = {
   loop?: boolean;
-  orientation?: "horizontal" | "vertical";
+  orientation?: "horizontal" | "vertical" | "grid";
   as?: React.ElementType;
   asChild?: boolean;
 } & ComponentPropsWithoutRef<"div">;
@@ -48,7 +66,7 @@ export function RovingFocusGroup({
   ...props
 }: RovingFocusGroupProps) {
   const [currentIndex, setCurrentIndex] = useState(-1);
-  const registeredItems = useRef<Array<{ id: string; focusable: boolean }>>([]);
+  const registeredItems = useRef<RegisteredItem[]>([]);
   const groupRef = useRef<HTMLDivElement>(null);
   const hasDefaultActiveItem = useRef(false);
 
@@ -62,14 +80,18 @@ export function RovingFocusGroup({
     return -1;
   };
 
-  const registerItem = (id: string, focusable: boolean = true): number => {
+  const registerItem = (id: string, options?: RegisterItemOptions): number => {
+    const focusable = options?.focusable ?? true;
+    const position = options?.position;
+
     const existingIndex = registeredItems.current.findIndex(
       (item) => item.id === id,
     );
     if (existingIndex === -1) {
-      registeredItems.current.push({ id, focusable });
+      registeredItems.current.push({ id, focusable, position });
     } else {
-      registeredItems.current[existingIndex] = { id, focusable };
+      // Update in place to maintain stable index for focus stability
+      registeredItems.current[existingIndex] = { id, focusable, position };
     }
     return registeredItems.current.findIndex((item) => item.id === id);
   };
@@ -167,7 +189,38 @@ export function RovingFocusGroup({
     }
   };
 
+  const focusFirstItem = () => {
+    if (orientation === "grid") {
+      const idx = findGridFirstFocusable();
+      if (idx !== -1) {
+        focusItemAtIndex(idx);
+      }
+      return;
+    }
+    // Find the first focusable item
+    for (let i = 0; i < registeredItems.current.length; i++) {
+      const item = registeredItems.current[i];
+      if (item && item.focusable) {
+        setCurrentIndex(i);
+        const firstItemElement = groupRef.current?.querySelector(
+          `[data-roving-focus-item="${item.id}"]`,
+        );
+        if (firstItemElement) {
+          (firstItemElement as HTMLElement).focus();
+        }
+        return;
+      }
+    }
+  };
+
   const focusLastItem = () => {
+    if (orientation === "grid") {
+      const idx = findGridLastFocusable();
+      if (idx !== -1) {
+        focusItemAtIndex(idx);
+      }
+      return;
+    }
     // Find the last focusable item
     for (let i = registeredItems.current.length - 1; i >= 0; i--) {
       const item = registeredItems.current[i];
@@ -184,19 +237,170 @@ export function RovingFocusGroup({
     }
   };
 
-  const focusFirstItem = () => {
-    // Find the first focusable item
-    for (let i = 0; i < registeredItems.current.length; i++) {
-      const item = registeredItems.current[i];
-      if (item && item.focusable) {
-        setCurrentIndex(i);
-        const firstItemElement = groupRef.current?.querySelector(
-          `[data-roving-focus-item="${item.id}"]`,
-        );
-        if (firstItemElement) {
-          (firstItemElement as HTMLElement).focus();
-        }
+  // Grid navigation helpers
+  const focusItemAtIndex = (index: number) => {
+    setCurrentIndex(index);
+    const item = registeredItems.current[index];
+    if (item) {
+      const element = groupRef.current?.querySelector(
+        `[data-roving-focus-item="${item.id}"]`,
+      );
+      if (element) {
+        (element as HTMLElement).focus();
+      }
+    }
+  };
+
+  const getRowPeers = (row: number) => {
+    return registeredItems.current
+      .map((item, index) => ({ ...item, index }))
+      .filter((item) => item.position?.row === row)
+      .sort((a, b) => (a.position?.column ?? 0) - (b.position?.column ?? 0));
+  };
+
+  const getColumnPeers = (column: number) => {
+    return registeredItems.current
+      .map((item, index) => ({ ...item, index }))
+      .filter((item) => item.position?.column === column)
+      .sort((a, b) => (a.position?.row ?? 0) - (b.position?.row ?? 0));
+  };
+
+  const findGridFirstFocusable = (): number => {
+    const focusableItems = registeredItems.current
+      .map((item, index) => ({ ...item, index }))
+      .filter((item) => item.focusable && item.position);
+
+    if (focusableItems.length === 0) return -1;
+
+    focusableItems.sort((a, b) => {
+      const rowDiff = (a.position?.row ?? 0) - (b.position?.row ?? 0);
+      if (rowDiff !== 0) return rowDiff;
+      return (a.position?.column ?? 0) - (b.position?.column ?? 0);
+    });
+
+    return focusableItems[0]?.index ?? -1;
+  };
+
+  const findGridLastFocusable = (): number => {
+    const focusableItems = registeredItems.current
+      .map((item, index) => ({ ...item, index }))
+      .filter((item) => item.focusable && item.position);
+
+    if (focusableItems.length === 0) return -1;
+
+    focusableItems.sort((a, b) => {
+      const rowDiff = (b.position?.row ?? 0) - (a.position?.row ?? 0);
+      if (rowDiff !== 0) return rowDiff;
+      return (b.position?.column ?? 0) - (a.position?.column ?? 0);
+    });
+
+    return focusableItems[0]?.index ?? -1;
+  };
+
+  const focusRight = () => {
+    const current = registeredItems.current[currentIndex];
+    if (!current?.position) return;
+
+    const rowPeers = getRowPeers(current.position.row);
+    const currentPeerIdx = rowPeers.findIndex((p) => p.index === currentIndex);
+
+    // Find next focusable in row
+    for (let i = currentPeerIdx + 1; i < rowPeers.length; i++) {
+      if (rowPeers[i]?.focusable) {
+        focusItemAtIndex(rowPeers[i].index);
         return;
+      }
+    }
+
+    // At end of row
+    if (loop) {
+      // Loop to first focusable in row
+      for (let i = 0; i < currentPeerIdx; i++) {
+        if (rowPeers[i]?.focusable) {
+          focusItemAtIndex(rowPeers[i].index);
+          return;
+        }
+      }
+    }
+  };
+
+  const focusLeft = () => {
+    const current = registeredItems.current[currentIndex];
+    if (!current?.position) return;
+
+    const rowPeers = getRowPeers(current.position.row);
+    const currentPeerIdx = rowPeers.findIndex((p) => p.index === currentIndex);
+
+    // Find previous focusable in row
+    for (let i = currentPeerIdx - 1; i >= 0; i--) {
+      if (rowPeers[i]?.focusable) {
+        focusItemAtIndex(rowPeers[i].index);
+        return;
+      }
+    }
+
+    // At start of row
+    if (loop) {
+      // Loop to last focusable in row
+      for (let i = rowPeers.length - 1; i > currentPeerIdx; i--) {
+        if (rowPeers[i]?.focusable) {
+          focusItemAtIndex(rowPeers[i].index);
+          return;
+        }
+      }
+    }
+  };
+
+  const focusDown = () => {
+    const current = registeredItems.current[currentIndex];
+    if (!current?.position) return;
+
+    const colPeers = getColumnPeers(current.position.column);
+    const currentPeerIdx = colPeers.findIndex((p) => p.index === currentIndex);
+
+    // Find next focusable in column
+    for (let i = currentPeerIdx + 1; i < colPeers.length; i++) {
+      if (colPeers[i]?.focusable) {
+        focusItemAtIndex(colPeers[i].index);
+        return;
+      }
+    }
+
+    // At end of column
+    if (loop) {
+      // Loop to first focusable in column
+      for (let i = 0; i < currentPeerIdx; i++) {
+        if (colPeers[i]?.focusable) {
+          focusItemAtIndex(colPeers[i].index);
+          return;
+        }
+      }
+    }
+  };
+
+  const focusUp = () => {
+    const current = registeredItems.current[currentIndex];
+    if (!current?.position) return;
+
+    const colPeers = getColumnPeers(current.position.column);
+    const currentPeerIdx = colPeers.findIndex((p) => p.index === currentIndex);
+
+    // Find previous focusable in column
+    for (let i = currentPeerIdx - 1; i >= 0; i--) {
+      if (colPeers[i]?.focusable) {
+        focusItemAtIndex(colPeers[i].index);
+        return;
+      }
+    }
+
+    // At start of column
+    if (loop) {
+      // Loop to last focusable in column
+      for (let i = colPeers.length - 1; i > currentPeerIdx; i--) {
+        if (colPeers[i]?.focusable) {
+          focusItemAtIndex(colPeers[i].index);
+          return;
+        }
       }
     }
   };
@@ -249,7 +453,12 @@ export function RovingFocusGroup({
     focusPreviousItem,
     focusLastItem,
     focusFirstItem,
+    focusRight,
+    focusLeft,
+    focusDown,
+    focusUp,
     orientation,
+    loop,
     setDefaultActiveItem,
   };
 
