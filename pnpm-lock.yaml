@@ -11,9 +11,6 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.2.3
         version: 1.2.3(@types/react@18.3.23)(react@18.3.1)
-      react:
-        specifier: ^18.2.0
-        version: 18.3.1
     devDependencies:
       '@testing-library/jest-dom':
         specifier: ^6.6.3
@@ -36,6 +33,12 @@ importers:
       prettier-plugin-astro:
         specifier: ^0.14.1
         version: 0.14.1
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.3.1
+        version: 18.3.1(react@18.3.1)
       typescript:
         specifier: ^5.3.0
         version: 5.8.3
@@ -44,7 +47,7 @@ importers:
         version: 3.2.4(@types/debug@4.1.12)(@types/node@24.10.1)(@vitest/browser@3.2.4)(jsdom@26.1.0)(lightningcss@1.30.2)
       vitest-browser-react:
         specifier: ^1.0.1
-        version: 1.0.1(@types/react-dom@19.2.3(@types/react@18.3.23))(@types/react@18.3.23)(@vitest/browser@3.2.4)(react-dom@19.2.1(react@18.3.1))(react@18.3.1)(vitest@3.2.4)
+        version: 1.0.1(@types/react-dom@19.2.3(@types/react@18.3.23))(@types/react@18.3.23)(@vitest/browser@3.2.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(vitest@3.2.4)
 
   website:
     dependencies:
@@ -1998,6 +2001,11 @@ packages:
   radix3@1.1.2:
     resolution: {integrity: sha512-b484I/7b8rDEdSDKckSSBA8knMpcdsXudlE/LNL639wFoHKwLbEkQFZHWEYwDC0wa0FKUcCY+GAF73Z7wxNVFA==}
 
+  react-dom@18.3.1:
+    resolution: {integrity: sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==}
+    peerDependencies:
+      react: ^18.3.1
+
   react-dom@19.2.1:
     resolution: {integrity: sha512-ibrK8llX2a4eOskq1mXKu/TGZj9qzomO+sNfO98M6d9zIPOEhlBkMkBUBLd1vgS0gQsLDBzA+8jJBVXDnfHmJg==}
     peerDependencies:
@@ -2101,6 +2109,9 @@ packages:
   saxes@6.0.0:
     resolution: {integrity: sha512-xAg7SOnEhrm5zI3puOOKyy1OMcMlIJZYNJY7xLBwSze0UjhPLnWfj2GF2EpT0jmzaJKIWKHLsaSSajf35bcYnA==}
     engines: {node: '>=v12.22.7'}
+
+  scheduler@0.23.2:
+    resolution: {integrity: sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ==}
 
   scheduler@0.27.0:
     resolution: {integrity: sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q==}
@@ -4703,10 +4714,11 @@ snapshots:
 
   radix3@1.1.2: {}
 
-  react-dom@19.2.1(react@18.3.1):
+  react-dom@18.3.1(react@18.3.1):
     dependencies:
+      loose-envify: 1.4.0
       react: 18.3.1
-      scheduler: 0.27.0
+      scheduler: 0.23.2
 
   react-dom@19.2.1(react@19.2.1):
     dependencies:
@@ -4874,6 +4886,10 @@ snapshots:
   saxes@6.0.0:
     dependencies:
       xmlchars: 2.2.0
+
+  scheduler@0.23.2:
+    dependencies:
+      loose-envify: 1.4.0
 
   scheduler@0.27.0: {}
 
@@ -5211,11 +5227,11 @@ snapshots:
     optionalDependencies:
       vite: 6.4.1(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)
 
-  vitest-browser-react@1.0.1(@types/react-dom@19.2.3(@types/react@18.3.23))(@types/react@18.3.23)(@vitest/browser@3.2.4)(react-dom@19.2.1(react@18.3.1))(react@18.3.1)(vitest@3.2.4):
+  vitest-browser-react@1.0.1(@types/react-dom@19.2.3(@types/react@18.3.23))(@types/react@18.3.23)(@vitest/browser@3.2.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(vitest@3.2.4):
     dependencies:
       '@vitest/browser': 3.2.4(vite@5.4.19(@types/node@24.10.1)(lightningcss@1.30.2))(vitest@3.2.4)
       react: 18.3.1
-      react-dom: 19.2.1(react@18.3.1)
+      react-dom: 18.3.1(react@18.3.1)
       vitest: 3.2.4(@types/debug@4.1.12)(@types/node@24.10.1)(@vitest/browser@3.2.4)(jsdom@26.1.0)(lightningcss@1.30.2)
     optionalDependencies:
       '@types/react': 18.3.23
