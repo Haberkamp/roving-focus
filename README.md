@@ -4,6 +4,7 @@
 
 ![Created by](https://img.shields.io/badge/created%20by-@n__haberkamp-065afa.svg)
 ![NPM License](https://img.shields.io/npm/l/%40roving-focus%2Freact)
+[![Changelog](https://img.shields.io/badge/changelog-blue)](./CHANGELOG.md)
 
 ## Highlights
 
