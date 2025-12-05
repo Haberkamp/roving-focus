@@ -38,7 +38,8 @@
     "vitest-browser-react": "^1.0.1"
   },
   "files": [
-    "dist"
+    "dist",
+    "CHANGELOG.md"
   ],
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3"
