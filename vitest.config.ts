@@ -10,19 +10,11 @@ export default defineConfig({
         test: {
           // an example of file based convention,
           // you don't have to follow it
-          include: ["src/**/*.spec.tsx"],
-          name: "unit",
-          environment: "jsdom",
-        },
-      },
-      {
-        test: {
-          // an example of file based convention,
-          // you don't have to follow it
           include: ["src/**/*.browser.{test,spec}.tsx"],
           name: "browser",
           browser: {
             enabled: true,
+            provider: "playwright",
             instances: [{ browser: "chromium" }],
           },
         },

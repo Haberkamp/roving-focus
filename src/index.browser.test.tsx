@@ -17,7 +17,7 @@ it("focuses the first item when pressing tab", async () => {
   );
 
   // ACT
-  await userEvent.tab();
+  await userEvent.keyboard("{Tab}");
 
   // ASSERT
   await expect.element(screen.getByText("Item 1")).toHaveFocus();
@@ -38,8 +38,8 @@ it("focuses the next item outside the group when pressing tab", async () => {
   );
 
   // ACT
-  await userEvent.tab();
-  await userEvent.tab();
+  await userEvent.keyboard("{Tab}");
+  await userEvent.keyboard("{Tab}");
 
   // ASSERT
   await expect.element(screen.getByText("Outside")).toHaveFocus();
@@ -58,13 +58,11 @@ it("re-focuses the first item when pressing Shift + Tab", async () => {
     </div>,
   );
 
-  await userEvent.tab();
-  await userEvent.tab();
+  await userEvent.keyboard("{Tab}");
+  await userEvent.keyboard("{Tab}");
 
   // ACT
-  await userEvent.tab({
-    shift: true,
-  });
+  await userEvent.keyboard("{Shift>}{Tab}{/Shift}");
 
   // ASSERT
   await expect.element(screen.getByText("Item 1")).toHaveFocus();
@@ -80,7 +78,7 @@ it("focuses the next item when pressing the right arrow key", async () => {
     </RovingFocusGroup>,
   );
 
-  await userEvent.tab();
+  await userEvent.keyboard("{Tab}");
 
   // ACT
   await userEvent.keyboard("{ArrowRight}");
