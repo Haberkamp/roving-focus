@@ -1,5 +1,11 @@
 # @roving-focus/react
 
+## 1.1.1
+
+### Patch Changes
+
+- [b636a87](https://github.com/Haberkamp/roving-focus/commit/b636a87): Document grid feature
+
 ## 1.1.0
 
 ### Minor Changes
