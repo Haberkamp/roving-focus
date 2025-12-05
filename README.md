@@ -74,6 +74,19 @@ Press `ArrowUp` or `ArrowDown` to navigate between items.
 
 Press `ArrowLeft` or `ArrowRight` to navigate between items.
 
+#### Grid navigation
+
+```tsx
+<RovingFocusGroup orientation="grid">
+  <RovingFocusItem position={{ row: 0, column: 0 }}>0,0</RovingFocusItem>
+  <RovingFocusItem position={{ row: 0, column: 1 }}>0,1</RovingFocusItem>
+  <RovingFocusItem position={{ row: 1, column: 0 }}>1,0</RovingFocusItem>
+  <RovingFocusItem position={{ row: 1, column: 1 }}>1,1</RovingFocusItem>
+</RovingFocusGroup>
+```
+
+Press `ArrowUp`, `ArrowDown`, `ArrowLeft` or `ArrowRight` to navigate between items.
+
 #### Disabled items
 
 To make any item unfocusable, set the `focusable` prop to `false`.
@@ -119,14 +132,14 @@ By default looping is enabled. To disable it, set the `loop` prop to `false`.
 
 Props:
 
-- `orientation`: `"vertical" | "horizontal"` - The orientation of the group.
+- `orientation`: `"vertical" | "horizontal" | "grid"` - The orientation of the group.
 - `loop`: `boolean` - Whether the group should loop when the end or start of the group is reached.
 - `asChild`: `boolean` - Uses the child element as the root element.
 - `as`: `React.ElementType` - Allows you to pass a custom element as the root element.
 
 Data attributes:
 
-- `data-orientation`: `"vertical" | "horizontal"` - The orientation of the group.
+- `data-orientation`: `"vertical" | "horizontal" | "grid"` - The orientation of the group.
 
 #### RovingFocusItem
 
@@ -134,6 +147,7 @@ Props:
 
 - `focusable`: `boolean`
 - `active`: `boolean`
+- `position`: `{ row: number; column: number }` - The position of the item in the grid. Required when orientation is "grid".
 - `asChild`: `boolean` - Uses the child element as the root element.
 - `as`: `React.ElementType` - Allows you to pass a custom element as the root element.
 
