@@ -31,8 +31,9 @@ export function GridExample() {
         {tiles}
       </RovingFocusGroup>
 
-      <div className="absolute -bottom-12 left-0 text-[#2D2D2D]">
-        Use ←, →, ↑ or ↓ to move the orange rectangle
+      <div className="absolute -bottom-16 left-0 text-[#2D2D2D] leading-[1.3]">
+        Press Tab to focus the first item, then use ←, →, ↑ or ↓ to move the
+        orange rectangle.
       </div>
     </div>
   );
