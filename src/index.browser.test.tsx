@@ -1786,7 +1786,11 @@ describe("grid orientation", () => {
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem style={{ width: 50, height: 50 }} active focusable={false}>
+        <RovingFocusItem
+          style={{ width: 50, height: 50 }}
+          active
+          focusable={false}
+        >
           Cell 0,1
         </RovingFocusItem>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
@@ -2106,7 +2110,9 @@ describe("grid orientation - auto-detection", () => {
 
     const screen = render(<DynamicGrid />);
     // Wait for initial grid positions
-    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    await new Promise((r) =>
+      requestAnimationFrame(() => requestAnimationFrame(r)),
+    );
 
     await userEvent.tab(); // button
     await userEvent.tab(); // grid
@@ -2119,7 +2125,9 @@ describe("grid orientation - auto-detection", () => {
     await screen.getByText("Add Item").click();
 
     // Wait for rerender and recalc
-    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    await new Promise((r) =>
+      requestAnimationFrame(() => requestAnimationFrame(r)),
+    );
 
     // Focus should still be on Cell 1
     // Navigate right to find Cell 99 (new item inserted after Cell 1)
@@ -2153,7 +2161,9 @@ describe("grid orientation - auto-detection", () => {
 
     const screen = render(<DynamicGrid />);
     // Wait for initial grid positions
-    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    await new Promise((r) =>
+      requestAnimationFrame(() => requestAnimationFrame(r)),
+    );
 
     await userEvent.tab(); // button
     await userEvent.tab(); // grid
@@ -2163,7 +2173,9 @@ describe("grid orientation - auto-detection", () => {
     await screen.getByText("Remove Item 1").click();
 
     // Wait for rerender and recalc
-    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    await new Promise((r) =>
+      requestAnimationFrame(() => requestAnimationFrame(r)),
+    );
 
     // Re-focus grid and navigate
     await screen.getByText("Cell 0").element().focus();
@@ -2193,7 +2205,9 @@ describe("grid orientation - auto-detection", () => {
     );
 
     // Wait for grid positions to be computed
-    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    await new Promise((r) =>
+      requestAnimationFrame(() => requestAnimationFrame(r)),
+    );
 
     await userEvent.tab();
     await expect.element(screen.getByText("A")).toHaveFocus();
@@ -2240,15 +2254,23 @@ describe("grid orientation - auto-detection", () => {
           orientation="grid"
           style={{ display: "grid", gridTemplateColumns: "repeat(2, 50px)" }}
         >
-          <RovingFocusItem style={{ width: 50, height: 50 }}>G1-A</RovingFocusItem>
-          <RovingFocusItem style={{ width: 50, height: 50 }}>G1-B</RovingFocusItem>
+          <RovingFocusItem style={{ width: 50, height: 50 }}>
+            G1-A
+          </RovingFocusItem>
+          <RovingFocusItem style={{ width: 50, height: 50 }}>
+            G1-B
+          </RovingFocusItem>
         </RovingFocusGroup>
         <RovingFocusGroup
           orientation="grid"
           style={{ display: "grid", gridTemplateColumns: "repeat(2, 50px)" }}
         >
-          <RovingFocusItem style={{ width: 50, height: 50 }}>G2-A</RovingFocusItem>
-          <RovingFocusItem style={{ width: 50, height: 50 }}>G2-B</RovingFocusItem>
+          <RovingFocusItem style={{ width: 50, height: 50 }}>
+            G2-A
+          </RovingFocusItem>
+          <RovingFocusItem style={{ width: 50, height: 50 }}>
+            G2-B
+          </RovingFocusItem>
         </RovingFocusGroup>
       </div>,
     );
@@ -2270,15 +2292,23 @@ describe("grid orientation - auto-detection", () => {
           loop={false}
           style={{ display: "grid", gridTemplateColumns: "repeat(2, 50px)" }}
         >
-          <RovingFocusItem style={{ width: 50, height: 50 }}>G1-A</RovingFocusItem>
-          <RovingFocusItem style={{ width: 50, height: 50 }}>G1-B</RovingFocusItem>
+          <RovingFocusItem style={{ width: 50, height: 50 }}>
+            G1-A
+          </RovingFocusItem>
+          <RovingFocusItem style={{ width: 50, height: 50 }}>
+            G1-B
+          </RovingFocusItem>
         </RovingFocusGroup>
         <RovingFocusGroup
           orientation="grid"
           style={{ display: "grid", gridTemplateColumns: "repeat(2, 50px)" }}
         >
-          <RovingFocusItem style={{ width: 50, height: 50 }}>G2-A</RovingFocusItem>
-          <RovingFocusItem style={{ width: 50, height: 50 }}>G2-B</RovingFocusItem>
+          <RovingFocusItem style={{ width: 50, height: 50 }}>
+            G2-A
+          </RovingFocusItem>
+          <RovingFocusItem style={{ width: 50, height: 50 }}>
+            G2-B
+          </RovingFocusItem>
         </RovingFocusGroup>
       </div>,
     );
@@ -2405,5 +2435,111 @@ describe("grid orientation - auto-detection", () => {
 
     // ASSERT - skips Cell 2 (unfocusable), goes to Cell 1
     await expect.element(screen.getByText("Cell 1")).toHaveFocus();
+  });
+});
+
+// =============================================================================
+// SCROLL BEHAVIOR TESTS
+// =============================================================================
+
+describe("scroll behavior", () => {
+  it("does not scroll page when navigating visible items", async () => {
+    // ARRANGE - page scrolled down, grid visible but page has more content below
+    await page.viewport(800, 600);
+    const screen = render(
+      <div>
+        <div style={{ height: 200 }} data-testid="spacer-top" />
+        <RovingFocusGroup
+          orientation="grid"
+          style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
+        >
+          {Array.from({ length: 9 }, (_, i) => (
+            <RovingFocusItem key={i} style={{ width: 50, height: 50 }}>
+              Cell {i}
+            </RovingFocusItem>
+          ))}
+        </RovingFocusGroup>
+        <div style={{ height: 2000 }} data-testid="spacer-bottom" />
+      </div>,
+    );
+    // scroll page so grid is visible but not at top
+    window.scrollTo(0, 100);
+    await new Promise((r) => setTimeout(r, 100));
+    const scrollBefore = window.scrollY;
+    expect(scrollBefore).toBe(100); // verify scroll worked
+
+    await userEvent.tab();
+
+    // ACT
+    await userEvent.keyboard("{ArrowRight}");
+    await userEvent.keyboard("{ArrowDown}");
+
+    // ASSERT - page scroll unchanged, items still visible
+    await expect.element(screen.getByText("Cell 4")).toHaveFocus();
+    expect(window.scrollY).toBe(scrollBefore);
+  });
+
+  it("scrolls scrollable parent to keep focused item visible", async () => {
+    // ARRANGE - small scrollable container, many items
+    const screen = render(
+      <div
+        data-testid="scroll-container"
+        style={{ height: 80, overflow: "auto" }}
+      >
+        <RovingFocusGroup
+          orientation="grid"
+          style={{ display: "grid", gridTemplateColumns: "repeat(2, 50px)" }}
+        >
+          {Array.from({ length: 20 }, (_, i) => (
+            <RovingFocusItem key={i} style={{ width: 50, height: 50 }}>
+              Cell {i}
+            </RovingFocusItem>
+          ))}
+        </RovingFocusGroup>
+      </div>,
+    );
+    const container = screen.getByTestId("scroll-container").element();
+    container.scrollTop = 0;
+    await new Promise((r) => setTimeout(r, 50));
+    await userEvent.tab();
+
+    // ACT - navigate down to items outside container viewport
+    await userEvent.keyboard("{ArrowDown}");
+    await userEvent.keyboard("{ArrowDown}");
+    await userEvent.keyboard("{ArrowDown}");
+    await userEvent.keyboard("{ArrowDown}");
+
+    // ASSERT - container must scroll to show Cell 8
+    await expect.element(screen.getByText("Cell 8")).toHaveFocus();
+    expect(container.scrollTop).toBeGreaterThan(0);
+  });
+
+  it("scrolls page to keep focused item visible when outside viewport", async () => {
+    // ARRANGE - small viewport, grid taller than viewport
+    await page.viewport(800, 300);
+    const screen = render(
+      <RovingFocusGroup
+        orientation="grid"
+        style={{ display: "grid", gridTemplateColumns: "repeat(2, 50px)" }}
+      >
+        {Array.from({ length: 20 }, (_, i) => (
+          <RovingFocusItem key={i} style={{ width: 50, height: 50 }}>
+            Cell {i}
+          </RovingFocusItem>
+        ))}
+      </RovingFocusGroup>,
+    );
+    window.scrollTo(0, 0);
+    await new Promise((r) => setTimeout(r, 50));
+    await userEvent.tab();
+
+    // ACT - navigate down to items below viewport
+    for (let i = 0; i < 6; i++) {
+      await userEvent.keyboard("{ArrowDown}");
+    }
+
+    // ASSERT - page must scroll to show Cell 12
+    await expect.element(screen.getByText("Cell 12")).toHaveFocus();
+    expect(window.scrollY).toBeGreaterThan(0);
   });
 });

@@ -60,6 +60,21 @@ export function RovingFocusItem({
   const ref = useRef<HTMLSpanElement>(null);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLSpanElement>) => {
+    const navigationKeys = [
+      "ArrowRight",
+      "ArrowLeft",
+      "ArrowDown",
+      "ArrowUp",
+      "PageDown",
+      "End",
+      "PageUp",
+      "Home",
+    ];
+
+    if (navigationKeys.includes(event.key)) {
+      event.preventDefault();
+    }
+
     if (orientation === "grid") {
       if (event.key === "ArrowRight") focusRight();
       if (event.key === "ArrowLeft") focusLeft();
