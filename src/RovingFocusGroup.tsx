@@ -271,7 +271,8 @@ export function RovingFocusGroup({
       );
 
       if (nextItemElement) {
-        (nextItemElement as HTMLElement).focus();
+        (nextItemElement as HTMLElement).focus({ preventScroll: true });
+        scrollIntoViewIfNeeded(nextItemElement as HTMLElement);
       }
     }
   };
@@ -287,7 +288,8 @@ export function RovingFocusGroup({
       );
 
       if (previousItemElement) {
-        (previousItemElement as HTMLElement).focus();
+        (previousItemElement as HTMLElement).focus({ preventScroll: true });
+        scrollIntoViewIfNeeded(previousItemElement as HTMLElement);
       }
     }
   };
@@ -309,7 +311,8 @@ export function RovingFocusGroup({
           `[data-roving-focus-item="${item.id}"]`,
         );
         if (firstItemElement) {
-          (firstItemElement as HTMLElement).focus();
+          (firstItemElement as HTMLElement).focus({ preventScroll: true });
+          scrollIntoViewIfNeeded(firstItemElement as HTMLElement);
         }
         return;
       }
@@ -333,10 +336,74 @@ export function RovingFocusGroup({
           `[data-roving-focus-item="${item.id}"]`,
         );
         if (lastItemElement) {
-          (lastItemElement as HTMLElement).focus();
+          (lastItemElement as HTMLElement).focus({ preventScroll: true });
+          scrollIntoViewIfNeeded(lastItemElement as HTMLElement);
         }
         return;
       }
+    }
+  };
+
+  // Find nearest scrollable parent (not the page itself)
+  const getScrollableParent = (element: HTMLElement): HTMLElement | null => {
+    let parent = element.parentElement;
+    while (parent && parent !== document.body) {
+      const { overflow, overflowY, overflowX } = getComputedStyle(parent);
+      if (/(auto|scroll)/.test(overflow + overflowY + overflowX)) {
+        return parent;
+      }
+      parent = parent.parentElement;
+    }
+    return null;
+  };
+
+  // Scroll element into view within scrollable container or page
+  const scrollIntoViewIfNeeded = (element: HTMLElement) => {
+    const scrollableParent = getScrollableParent(element);
+    const padding = 20;
+
+    if (!scrollableParent) {
+      // No scrollable parent — scroll the page itself
+      const rect = element.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
+
+      let scrollX = window.scrollX;
+      let scrollY = window.scrollY;
+
+      if (rect.bottom + padding > viewportHeight) {
+        scrollY += rect.bottom + padding - viewportHeight;
+      } else if (rect.top - padding < 0) {
+        scrollY += rect.top - padding;
+      }
+
+      if (rect.right + padding > viewportWidth) {
+        scrollX += rect.right + padding - viewportWidth;
+      } else if (rect.left - padding < 0) {
+        scrollX += rect.left - padding;
+      }
+
+      window.scrollTo(scrollX, scrollY);
+      return;
+    }
+
+    const parentRect = scrollableParent.getBoundingClientRect();
+    const elementRect = element.getBoundingClientRect();
+
+    // Check if element is outside visible area of scrollable parent
+    if (elementRect.bottom + padding > parentRect.bottom) {
+      scrollableParent.scrollTop +=
+        elementRect.bottom + padding - parentRect.bottom;
+    } else if (elementRect.top - padding < parentRect.top) {
+      scrollableParent.scrollTop -= parentRect.top - elementRect.top + padding;
+    }
+
+    if (elementRect.right + padding > parentRect.right) {
+      scrollableParent.scrollLeft +=
+        elementRect.right + padding - parentRect.right;
+    } else if (elementRect.left - padding < parentRect.left) {
+      scrollableParent.scrollLeft -=
+        parentRect.left - elementRect.left + padding;
     }
   };
 
@@ -349,7 +416,8 @@ export function RovingFocusGroup({
         `[data-roving-focus-item="${item.id}"]`,
       );
       if (element) {
-        (element as HTMLElement).focus();
+        (element as HTMLElement).focus({ preventScroll: true });
+        scrollIntoViewIfNeeded(element as HTMLElement);
       }
     }
   };
@@ -360,21 +428,33 @@ export function RovingFocusGroup({
 
   const getRowPeers = (row: number) => {
     return registeredItems.current
-      .map((item, index) => ({ ...item, index, position: getPosition(item.id) }))
+      .map((item, index) => ({
+        ...item,
+        index,
+        position: getPosition(item.id),
+      }))
       .filter((item) => item.position?.row === row)
       .sort((a, b) => (a.position?.column ?? 0) - (b.position?.column ?? 0));
   };
 
   const getColumnPeers = (column: number) => {
     return registeredItems.current
-      .map((item, index) => ({ ...item, index, position: getPosition(item.id) }))
+      .map((item, index) => ({
+        ...item,
+        index,
+        position: getPosition(item.id),
+      }))
       .filter((item) => item.position?.column === column)
       .sort((a, b) => (a.position?.row ?? 0) - (b.position?.row ?? 0));
   };
 
   const findGridFirstFocusable = (): number => {
     const focusableItems = registeredItems.current
-      .map((item, index) => ({ ...item, index, position: getPosition(item.id) }))
+      .map((item, index) => ({
+        ...item,
+        index,
+        position: getPosition(item.id),
+      }))
       .filter((item) => item.focusable && item.position);
 
     if (focusableItems.length === 0) return -1;
@@ -390,7 +470,11 @@ export function RovingFocusGroup({
 
   const findGridLastFocusable = (): number => {
     const focusableItems = registeredItems.current
-      .map((item, index) => ({ ...item, index, position: getPosition(item.id) }))
+      .map((item, index) => ({
+        ...item,
+        index,
+        position: getPosition(item.id),
+      }))
       .filter((item) => item.focusable && item.position);
 
     if (focusableItems.length === 0) return -1;
