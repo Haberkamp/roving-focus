@@ -5,7 +5,8 @@ import { RovingFocusItem } from "./RovingFocusItem";
 import { userEvent, page, server } from "@vitest/browser/context";
 import { useState } from "react";
 
-const isWebkit = server.provider === "playwright" && server.browser === "webkit";
+const isWebkit =
+  server.provider === "playwright" && server.browser === "webkit";
 
 afterEach(() => vi.restoreAllMocks());
 
