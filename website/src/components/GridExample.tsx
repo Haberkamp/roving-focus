@@ -8,7 +8,6 @@ export function GridExample() {
     return (
       <RovingFocusItem
         key={i}
-        position={{ row, column: col }}
         style={{
           width: "50px",
           height: "50px",

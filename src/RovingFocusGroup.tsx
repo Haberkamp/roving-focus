@@ -6,19 +6,18 @@ import {
   useState,
   useRef,
   useEffect,
+  useCallback,
 } from "react";
 
 export type GridPosition = { row: number; column: number };
 
 type RegisterItemOptions = {
   focusable?: boolean;
-  position?: GridPosition;
 };
 
 type RegisteredItem = {
   id: string;
   focusable: boolean;
-  position?: GridPosition;
 };
 
 type RovingFocusContextType = {
@@ -70,6 +69,10 @@ export function RovingFocusGroup({
   const groupRef = useRef<HTMLDivElement>(null);
   const hasDefaultActiveItem = useRef(false);
 
+  // Grid auto-detection refs
+  const gridPositionsRef = useRef<Map<string, GridPosition>>(new Map());
+  const recalcScheduled = useRef(false);
+
   const findFirstFocusableIndex = (): number => {
     for (let i = 0; i < registeredItems.current.length; i++) {
       const item = registeredItems.current[i];
@@ -80,19 +83,115 @@ export function RovingFocusGroup({
     return -1;
   };
 
+  // Compute grid positions from DOM
+  const computeGridPositions = useCallback(() => {
+    if (orientation !== "grid" || !groupRef.current) return;
+
+    const elements = groupRef.current.querySelectorAll(
+      "[data-roving-focus-item]",
+    );
+    if (elements.length === 0) return;
+
+    const items: { id: string; rect: DOMRect }[] = [];
+    elements.forEach((el) => {
+      const id = el.getAttribute("data-roving-focus-item");
+      if (id) {
+        items.push({ id, rect: el.getBoundingClientRect() });
+      }
+    });
+
+    if (items.length === 0) return;
+
+    // Calculate row threshold based on smallest item height
+    const minHeight = Math.min(...items.map((item) => item.rect.height));
+    const rowThreshold = Math.max(minHeight / 2, 1);
+
+    // Sort by top, then left
+    items.sort((a, b) => {
+      const topDiff = a.rect.top - b.rect.top;
+      if (Math.abs(topDiff) > rowThreshold) return topDiff;
+      return a.rect.left - b.rect.left;
+    });
+
+    // Cluster into rows
+    const newPositions = new Map<string, GridPosition>();
+    let currentRow = 0;
+    let currentColumn = 0;
+    let currentRowTop = items[0]?.rect.top ?? 0;
+
+    for (const item of items) {
+      if (Math.abs(item.rect.top - currentRowTop) > rowThreshold) {
+        currentRow++;
+        currentColumn = 0;
+        currentRowTop = item.rect.top;
+      }
+      newPositions.set(item.id, { row: currentRow, column: currentColumn });
+      currentColumn++;
+    }
+
+    gridPositionsRef.current = newPositions;
+  }, [orientation]);
+
+  // Debounced recalc scheduler
+  const scheduleRecalc = useCallback(() => {
+    if (typeof requestAnimationFrame === "undefined") return;
+    if (recalcScheduled.current) return;
+    recalcScheduled.current = true;
+    requestAnimationFrame(() => {
+      recalcScheduled.current = false;
+      computeGridPositions();
+    });
+  }, [computeGridPositions]);
+
+  // Observers for grid mode
+  useEffect(() => {
+    if (orientation !== "grid" || !groupRef.current) return;
+
+    // Initial compute
+    scheduleRecalc();
+
+    const container = groupRef.current;
+
+    // ResizeObserver
+    const resizeObserver = new ResizeObserver(() => {
+      scheduleRecalc();
+    });
+    resizeObserver.observe(container);
+
+    // MutationObserver
+    const mutationObserver = new MutationObserver(() => {
+      scheduleRecalc();
+    });
+    mutationObserver.observe(container, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class", "style", "data-roving-focus-item"],
+    });
+
+    return () => {
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
+    };
+  }, [orientation, scheduleRecalc]);
+
   const registerItem = (id: string, options?: RegisterItemOptions): number => {
     const focusable = options?.focusable ?? true;
-    const position = options?.position;
 
     const existingIndex = registeredItems.current.findIndex(
       (item) => item.id === id,
     );
     if (existingIndex === -1) {
-      registeredItems.current.push({ id, focusable, position });
+      registeredItems.current.push({ id, focusable });
     } else {
       // Update in place to maintain stable index for focus stability
-      registeredItems.current[existingIndex] = { id, focusable, position };
+      registeredItems.current[existingIndex] = { id, focusable };
     }
+
+    if (orientation === "grid") {
+      scheduleRecalc();
+    }
+
     return registeredItems.current.findIndex((item) => item.id === id);
   };
 
@@ -100,6 +199,10 @@ export function RovingFocusGroup({
     const index = registeredItems.current.findIndex((item) => item.id === id);
     if (index > -1) {
       registeredItems.current.splice(index, 1);
+    }
+
+    if (orientation === "grid") {
+      scheduleRecalc();
     }
   };
 
@@ -251,23 +354,27 @@ export function RovingFocusGroup({
     }
   };
 
+  const getPosition = (id: string): GridPosition | undefined => {
+    return gridPositionsRef.current.get(id);
+  };
+
   const getRowPeers = (row: number) => {
     return registeredItems.current
-      .map((item, index) => ({ ...item, index }))
+      .map((item, index) => ({ ...item, index, position: getPosition(item.id) }))
       .filter((item) => item.position?.row === row)
       .sort((a, b) => (a.position?.column ?? 0) - (b.position?.column ?? 0));
   };
 
   const getColumnPeers = (column: number) => {
     return registeredItems.current
-      .map((item, index) => ({ ...item, index }))
+      .map((item, index) => ({ ...item, index, position: getPosition(item.id) }))
       .filter((item) => item.position?.column === column)
       .sort((a, b) => (a.position?.row ?? 0) - (b.position?.row ?? 0));
   };
 
   const findGridFirstFocusable = (): number => {
     const focusableItems = registeredItems.current
-      .map((item, index) => ({ ...item, index }))
+      .map((item, index) => ({ ...item, index, position: getPosition(item.id) }))
       .filter((item) => item.focusable && item.position);
 
     if (focusableItems.length === 0) return -1;
@@ -283,7 +390,7 @@ export function RovingFocusGroup({
 
   const findGridLastFocusable = (): number => {
     const focusableItems = registeredItems.current
-      .map((item, index) => ({ ...item, index }))
+      .map((item, index) => ({ ...item, index, position: getPosition(item.id) }))
       .filter((item) => item.focusable && item.position);
 
     if (focusableItems.length === 0) return -1;
@@ -299,9 +406,11 @@ export function RovingFocusGroup({
 
   const focusRight = () => {
     const current = registeredItems.current[currentIndex];
-    if (!current?.position) return;
+    if (!current) return;
+    const currentPos = getPosition(current.id);
+    if (!currentPos) return;
 
-    const rowPeers = getRowPeers(current.position.row);
+    const rowPeers = getRowPeers(currentPos.row);
     const currentPeerIdx = rowPeers.findIndex((p) => p.index === currentIndex);
 
     // Find next focusable in row
@@ -326,9 +435,11 @@ export function RovingFocusGroup({
 
   const focusLeft = () => {
     const current = registeredItems.current[currentIndex];
-    if (!current?.position) return;
+    if (!current) return;
+    const currentPos = getPosition(current.id);
+    if (!currentPos) return;
 
-    const rowPeers = getRowPeers(current.position.row);
+    const rowPeers = getRowPeers(currentPos.row);
     const currentPeerIdx = rowPeers.findIndex((p) => p.index === currentIndex);
 
     // Find previous focusable in row
@@ -353,9 +464,11 @@ export function RovingFocusGroup({
 
   const focusDown = () => {
     const current = registeredItems.current[currentIndex];
-    if (!current?.position) return;
+    if (!current) return;
+    const currentPos = getPosition(current.id);
+    if (!currentPos) return;
 
-    const colPeers = getColumnPeers(current.position.column);
+    const colPeers = getColumnPeers(currentPos.column);
     const currentPeerIdx = colPeers.findIndex((p) => p.index === currentIndex);
 
     // Find next focusable in column
@@ -380,9 +493,11 @@ export function RovingFocusGroup({
 
   const focusUp = () => {
     const current = registeredItems.current[currentIndex];
-    if (!current?.position) return;
+    if (!current) return;
+    const currentPos = getPosition(current.id);
+    if (!currentPos) return;
 
-    const colPeers = getColumnPeers(current.position.column);
+    const colPeers = getColumnPeers(currentPos.column);
     const currentPeerIdx = colPeers.findIndex((p) => p.index === currentIndex);
 
     // Find previous focusable in column
