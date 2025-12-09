@@ -11,6 +11,10 @@ Grid navigation now auto-detects item positions from the DOM layout using `getBo
 
 **Migration:** Remove all `position={{ row, column }}` props from `RovingFocusItem` components. Ensure your grid container uses CSS Grid (`display: grid`) — the component will derive positions automatically.
 
+### Patch Changes
+
+- Fix Firefox-specific focus/scroll behavior for grid orientation inside scrollable parents so the focused cell, not the container, receives focus while the parent scrolls to reveal it
+
 ## 1.1.1
 
 ### Patch Changes
