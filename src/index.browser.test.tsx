@@ -2,7 +2,8 @@ import { render } from "vitest-browser-react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { RovingFocusGroup } from "./RovingFocusGroup";
 import { RovingFocusItem } from "./RovingFocusItem";
-import { userEvent } from "@vitest/browser/context";
+import { userEvent, page } from "@vitest/browser/context";
+import { useState } from "react";
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -994,10 +995,16 @@ it("focuses the next focusable item when the default active item is unfocusable"
 });
 
 // =============================================================================
-// GRID ORIENTATION TESTS
+// GRID ORIENTATION TESTS (using CSS grid layout for auto-detection)
 // =============================================================================
 
 describe("grid orientation", () => {
+  // Helper to create a grid style
+  const gridStyle = (cols: number) => ({
+    display: "grid" as const,
+    gridTemplateColumns: `repeat(${cols}, 50px)`,
+  });
+
   // ---------------------------------------------------------------------------
   // Orientation & Data Attributes
   // ---------------------------------------------------------------------------
@@ -1005,11 +1012,11 @@ describe("grid orientation", () => {
   it('renders group with data-orientation="grid"', async () => {
     // ARRANGE
     const screen = render(
-      <RovingFocusGroup orientation="grid">
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 0, column: 1 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,1
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1024,11 +1031,11 @@ describe("grid orientation", () => {
   it('renders items with data-orientation="grid"', async () => {
     // ARRANGE
     const screen = render(
-      <RovingFocusGroup orientation="grid">
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 0, column: 1 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,1
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1044,63 +1051,20 @@ describe("grid orientation", () => {
   });
 
   // ---------------------------------------------------------------------------
-  // Position Prop & Error Semantics
-  // ---------------------------------------------------------------------------
-
-  it("throws error when item in grid mode is missing position prop", () => {
-    // ARRANGE & ACT & ASSERT
-    expect(() => {
-      render(
-        <RovingFocusGroup orientation="grid">
-          <RovingFocusItem>Cell without position</RovingFocusItem>
-        </RovingFocusGroup>,
-      );
-    }).toThrow(
-      "RovingFocusItem in grid orientation must define a position: { row, column }",
-    );
-  });
-
-  it("does not throw when position prop is used in horizontal mode", async () => {
-    // ARRANGE & ACT & ASSERT
-    expect(() => {
-      render(
-        <RovingFocusGroup orientation="horizontal">
-          <RovingFocusItem position={{ row: 0, column: 0 }}>
-            Item 1
-          </RovingFocusItem>
-        </RovingFocusGroup>,
-      );
-    }).not.toThrow();
-  });
-
-  it("does not throw when position prop is used in vertical mode", async () => {
-    // ARRANGE & ACT & ASSERT
-    expect(() => {
-      render(
-        <RovingFocusGroup orientation="vertical">
-          <RovingFocusItem position={{ row: 0, column: 0 }}>
-            Item 1
-          </RovingFocusItem>
-        </RovingFocusGroup>,
-      );
-    }).not.toThrow();
-  });
-
-  // ---------------------------------------------------------------------------
   // Arrow Key Navigation - Row (ArrowRight / ArrowLeft)
   // ---------------------------------------------------------------------------
 
   it("focuses next cell in row when pressing ArrowRight", async () => {
-    // ARRANGE
+    // ARRANGE - 3 items in a row
     const screen = render(
-      <RovingFocusGroup orientation="grid">
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" style={gridStyle(3)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 0, column: 1 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,1
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 0, column: 2 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,2
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1121,13 +1085,13 @@ describe("grid orientation", () => {
   });
 
   it("focuses previous cell in row when pressing ArrowLeft", async () => {
-    // ARRANGE
+    // ARRANGE - 2 items in a row
     const screen = render(
-      <RovingFocusGroup orientation="grid">
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 0, column: 1 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,1
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1149,13 +1113,13 @@ describe("grid orientation", () => {
   });
 
   it("loops to first cell in row when pressing ArrowRight on last cell (loop=true)", async () => {
-    // ARRANGE
+    // ARRANGE - 2 items in a row
     const screen = render(
-      <RovingFocusGroup orientation="grid" loop={true}>
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" loop={true} style={gridStyle(2)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 0, column: 1 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,1
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1171,13 +1135,13 @@ describe("grid orientation", () => {
   });
 
   it("stays on last cell in row when pressing ArrowRight on last cell (loop=false)", async () => {
-    // ARRANGE
+    // ARRANGE - 2 items in a row
     const screen = render(
-      <RovingFocusGroup orientation="grid" loop={false}>
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" loop={false} style={gridStyle(2)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 0, column: 1 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,1
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1193,13 +1157,13 @@ describe("grid orientation", () => {
   });
 
   it("loops to last cell in row when pressing ArrowLeft on first cell (loop=true)", async () => {
-    // ARRANGE
+    // ARRANGE - 2 items in a row
     const screen = render(
-      <RovingFocusGroup orientation="grid" loop={true}>
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" loop={true} style={gridStyle(2)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 0, column: 1 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,1
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1214,13 +1178,13 @@ describe("grid orientation", () => {
   });
 
   it("stays on first cell in row when pressing ArrowLeft on first cell (loop=false)", async () => {
-    // ARRANGE
+    // ARRANGE - 2 items in a row
     const screen = render(
-      <RovingFocusGroup orientation="grid" loop={false}>
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" loop={false} style={gridStyle(2)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 0, column: 1 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,1
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1239,16 +1203,16 @@ describe("grid orientation", () => {
   // ---------------------------------------------------------------------------
 
   it("focuses next cell in column when pressing ArrowDown", async () => {
-    // ARRANGE
+    // ARRANGE - 3 items in a column (1 col grid)
     const screen = render(
-      <RovingFocusGroup orientation="grid">
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" style={gridStyle(1)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 0 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 1,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 2, column: 0 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 2,0
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1269,13 +1233,13 @@ describe("grid orientation", () => {
   });
 
   it("focuses previous cell in column when pressing ArrowUp", async () => {
-    // ARRANGE
+    // ARRANGE - 2 items in a column
     const screen = render(
-      <RovingFocusGroup orientation="grid">
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" style={gridStyle(1)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 0 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 1,0
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1297,13 +1261,13 @@ describe("grid orientation", () => {
   });
 
   it("loops to first cell in column when pressing ArrowDown on last cell (loop=true)", async () => {
-    // ARRANGE
+    // ARRANGE - 2 items in a column
     const screen = render(
-      <RovingFocusGroup orientation="grid" loop={true}>
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" loop={true} style={gridStyle(1)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 0 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 1,0
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1319,13 +1283,13 @@ describe("grid orientation", () => {
   });
 
   it("stays on last cell in column when pressing ArrowDown on last cell (loop=false)", async () => {
-    // ARRANGE
+    // ARRANGE - 2 items in a column
     const screen = render(
-      <RovingFocusGroup orientation="grid" loop={false}>
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" loop={false} style={gridStyle(1)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 0 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 1,0
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1341,13 +1305,13 @@ describe("grid orientation", () => {
   });
 
   it("loops to last cell in column when pressing ArrowUp on first cell (loop=true)", async () => {
-    // ARRANGE
+    // ARRANGE - 2 items in a column
     const screen = render(
-      <RovingFocusGroup orientation="grid" loop={true}>
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" loop={true} style={gridStyle(1)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 0 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 1,0
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1362,13 +1326,13 @@ describe("grid orientation", () => {
   });
 
   it("stays on first cell in column when pressing ArrowUp on first cell (loop=false)", async () => {
-    // ARRANGE
+    // ARRANGE - 2 items in a column
     const screen = render(
-      <RovingFocusGroup orientation="grid" loop={false}>
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" loop={false} style={gridStyle(1)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 0 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 1,0
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1389,17 +1353,17 @@ describe("grid orientation", () => {
   it("navigates within row without crossing to other rows via ArrowRight", async () => {
     // ARRANGE - 2x2 grid
     const screen = render(
-      <RovingFocusGroup orientation="grid" loop={false}>
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" loop={false} style={gridStyle(2)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 0, column: 1 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,1
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 0 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 1,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 1 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 1,1
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1417,17 +1381,17 @@ describe("grid orientation", () => {
   it("navigates within column without crossing to other columns via ArrowDown", async () => {
     // ARRANGE - 2x2 grid
     const screen = render(
-      <RovingFocusGroup orientation="grid" loop={false}>
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" loop={false} style={gridStyle(2)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 0, column: 1 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,1
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 0 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 1,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 1 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 1,1
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1445,17 +1409,17 @@ describe("grid orientation", () => {
   it("navigates full 2D grid: right, down, left, up", async () => {
     // ARRANGE - 2x2 grid
     const screen = render(
-      <RovingFocusGroup orientation="grid">
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 0, column: 1 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,1
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 0 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 1,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 1 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 1,1
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1483,19 +1447,19 @@ describe("grid orientation", () => {
   it.each(["Home", "PageUp"])(
     "focuses first focusable cell in grid when pressing %s",
     async (key) => {
-      // ARRANGE
+      // ARRANGE - 2x2 grid
       const screen = render(
-        <RovingFocusGroup orientation="grid">
-          <RovingFocusItem position={{ row: 0, column: 0 }}>
+        <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
+          <RovingFocusItem style={{ width: 50, height: 50 }}>
             Cell 0,0
           </RovingFocusItem>
-          <RovingFocusItem position={{ row: 0, column: 1 }}>
+          <RovingFocusItem style={{ width: 50, height: 50 }}>
             Cell 0,1
           </RovingFocusItem>
-          <RovingFocusItem position={{ row: 1, column: 0 }}>
+          <RovingFocusItem style={{ width: 50, height: 50 }}>
             Cell 1,0
           </RovingFocusItem>
-          <RovingFocusItem position={{ row: 1, column: 1 }}>
+          <RovingFocusItem style={{ width: 50, height: 50 }}>
             Cell 1,1
           </RovingFocusItem>
         </RovingFocusGroup>,
@@ -1518,19 +1482,19 @@ describe("grid orientation", () => {
   it.each(["End", "PageDown"])(
     "focuses last focusable cell in grid when pressing %s",
     async (key) => {
-      // ARRANGE
+      // ARRANGE - 2x2 grid
       const screen = render(
-        <RovingFocusGroup orientation="grid">
-          <RovingFocusItem position={{ row: 0, column: 0 }}>
+        <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
+          <RovingFocusItem style={{ width: 50, height: 50 }}>
             Cell 0,0
           </RovingFocusItem>
-          <RovingFocusItem position={{ row: 0, column: 1 }}>
+          <RovingFocusItem style={{ width: 50, height: 50 }}>
             Cell 0,1
           </RovingFocusItem>
-          <RovingFocusItem position={{ row: 1, column: 0 }}>
+          <RovingFocusItem style={{ width: 50, height: 50 }}>
             Cell 1,0
           </RovingFocusItem>
-          <RovingFocusItem position={{ row: 1, column: 1 }}>
+          <RovingFocusItem style={{ width: 50, height: 50 }}>
             Cell 1,1
           </RovingFocusItem>
         </RovingFocusGroup>,
@@ -1549,16 +1513,16 @@ describe("grid orientation", () => {
   );
 
   it("Home skips unfocusable first cell and focuses next focusable", async () => {
-    // ARRANGE
+    // ARRANGE - 2x2 grid with first cell unfocusable
     const screen = render(
-      <RovingFocusGroup orientation="grid">
-        <RovingFocusItem position={{ row: 0, column: 0 }} focusable={false}>
+      <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }} focusable={false}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 0, column: 1 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,1
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 0 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 1,0
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1574,19 +1538,19 @@ describe("grid orientation", () => {
   });
 
   it("End skips unfocusable last cell and focuses previous focusable", async () => {
-    // ARRANGE
+    // ARRANGE - 2x2 grid with last cell unfocusable
     const screen = render(
-      <RovingFocusGroup orientation="grid">
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 0, column: 1 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,1
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 0 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 1,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 1 }} focusable={false}>
+        <RovingFocusItem style={{ width: 50, height: 50 }} focusable={false}>
           Cell 1,1
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1605,16 +1569,16 @@ describe("grid orientation", () => {
   // ---------------------------------------------------------------------------
 
   it("skips non-focusable items when navigating right in row", async () => {
-    // ARRANGE
+    // ARRANGE - 3 items in a row, middle one unfocusable
     const screen = render(
-      <RovingFocusGroup orientation="grid">
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" style={gridStyle(3)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 0, column: 1 }} focusable={false}>
+        <RovingFocusItem style={{ width: 50, height: 50 }} focusable={false}>
           Cell 0,1
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 0, column: 2 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,2
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1630,16 +1594,16 @@ describe("grid orientation", () => {
   });
 
   it("skips non-focusable items when navigating down in column", async () => {
-    // ARRANGE
+    // ARRANGE - 3 items in a column, middle one unfocusable
     const screen = render(
-      <RovingFocusGroup orientation="grid">
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" style={gridStyle(1)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 0 }} focusable={false}>
+        <RovingFocusItem style={{ width: 50, height: 50 }} focusable={false}>
           Cell 1,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 2, column: 0 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 2,0
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1657,11 +1621,11 @@ describe("grid orientation", () => {
   it("non-focusable items have data-disabled and tabindex=-1", async () => {
     // ARRANGE
     const screen = render(
-      <RovingFocusGroup orientation="grid">
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 0, column: 1 }} focusable={false}>
+        <RovingFocusItem style={{ width: 50, height: 50 }} focusable={false}>
           Cell 0,1
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1677,23 +1641,23 @@ describe("grid orientation", () => {
   });
 
   // ---------------------------------------------------------------------------
-  // Position Changes & Focus Stability
+  // Focus Stability
   // ---------------------------------------------------------------------------
 
-  it("keeps focus on same element when position props change", async () => {
-    // ARRANGE
+  it("keeps focus on same element when layout changes via rerender", async () => {
+    // ARRANGE - 2x2 grid
     const { rerender, getByText } = render(
-      <RovingFocusGroup orientation="grid">
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell A
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 0, column: 1 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell B
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 0 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell C
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 1 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell D
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1701,19 +1665,19 @@ describe("grid orientation", () => {
     await userEvent.tab();
     await userEvent.keyboard("{ArrowRight}"); // focus Cell B
 
-    // ACT - rerender with changed positions (simulating resize)
+    // ACT - rerender with changed layout (1 column)
     rerender(
-      <RovingFocusGroup orientation="grid">
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" style={gridStyle(1)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell A
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 0 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell B
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 2, column: 0 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell C
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 3, column: 0 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell D
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1724,41 +1688,6 @@ describe("grid orientation", () => {
     await expect.element(getByText("Cell B")).toHaveAttribute("tabindex", "0");
   });
 
-  it("uses new positions for navigation after position change", async () => {
-    // ARRANGE
-    const { rerender, getByText } = render(
-      <RovingFocusGroup orientation="grid">
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
-          Cell A
-        </RovingFocusItem>
-        <RovingFocusItem position={{ row: 0, column: 1 }}>
-          Cell B
-        </RovingFocusItem>
-      </RovingFocusGroup>,
-    );
-    await userEvent.tab(); // focus Cell A
-
-    // ACT - rerender with B now below A instead of to the right
-    rerender(
-      <RovingFocusGroup orientation="grid">
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
-          Cell A
-        </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 0 }}>
-          Cell B
-        </RovingFocusItem>
-      </RovingFocusGroup>,
-    );
-
-    // ArrowRight should not move to B anymore (different column now)
-    await userEvent.keyboard("{ArrowRight}");
-    await expect.element(getByText("Cell A")).toHaveFocus();
-
-    // ArrowDown should move to B (same column now)
-    await userEvent.keyboard("{ArrowDown}");
-    await expect.element(getByText("Cell B")).toHaveFocus();
-  });
-
   // ---------------------------------------------------------------------------
   // Loop Semantics Per Row/Column (Not Flat)
   // ---------------------------------------------------------------------------
@@ -1766,17 +1695,17 @@ describe("grid orientation", () => {
   it("ArrowRight loops within row, not to next row", async () => {
     // ARRANGE - 2x2 grid, test that looping stays in row 0
     const screen = render(
-      <RovingFocusGroup orientation="grid" loop={true}>
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" loop={true} style={gridStyle(2)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 0, column: 1 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,1
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 0 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 1,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 1 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 1,1
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1794,17 +1723,17 @@ describe("grid orientation", () => {
   it("ArrowDown loops within column, not to next column", async () => {
     // ARRANGE - 2x2 grid, test that looping stays in column 0
     const screen = render(
-      <RovingFocusGroup orientation="grid" loop={true}>
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" loop={true} style={gridStyle(2)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 0, column: 1 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,1
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 0 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 1,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 1 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 1,1
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1824,16 +1753,16 @@ describe("grid orientation", () => {
   // ---------------------------------------------------------------------------
 
   it("focuses the default active item in grid mode", async () => {
-    // ARRANGE
+    // ARRANGE - 2x2 grid with second item active
     const screen = render(
-      <RovingFocusGroup orientation="grid">
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 0, column: 1 }} active>
+        <RovingFocusItem style={{ width: 50, height: 50 }} active>
           Cell 0,1
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 0 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 1,0
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1853,18 +1782,14 @@ describe("grid orientation", () => {
     // ARRANGE
     vi.spyOn(console, "warn").mockImplementation(() => {});
     const screen = render(
-      <RovingFocusGroup orientation="grid">
-        <RovingFocusItem position={{ row: 0, column: 0 }}>
+      <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
-        <RovingFocusItem
-          position={{ row: 0, column: 1 }}
-          active
-          focusable={false}
-        >
+        <RovingFocusItem style={{ width: 50, height: 50 }} active focusable={false}>
           Cell 0,1
         </RovingFocusItem>
-        <RovingFocusItem position={{ row: 1, column: 0 }}>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 1,0
         </RovingFocusItem>
       </RovingFocusGroup>,
@@ -1875,5 +1800,610 @@ describe("grid orientation", () => {
 
     // ASSERT
     await expect.element(screen.getByText("Cell 1,0")).toHaveFocus();
+  });
+});
+
+// =============================================================================
+// GRID AUTO-DETECTION TESTS (DOM-based position detection)
+// =============================================================================
+
+describe("grid orientation - auto-detection", () => {
+  // ---------------------------------------------------------------------------
+  // (a) Basic Fixed Grid Navigation
+  // ---------------------------------------------------------------------------
+
+  it("Tab focuses first cell in CSS grid", async () => {
+    // ARRANGE
+    const screen = render(
+      <RovingFocusGroup
+        orientation="grid"
+        style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
+      >
+        {Array.from({ length: 9 }, (_, i) => (
+          <RovingFocusItem key={i} style={{ width: 50, height: 50 }}>
+            Cell {i}
+          </RovingFocusItem>
+        ))}
+      </RovingFocusGroup>,
+    );
+
+    // ACT
+    await userEvent.tab();
+
+    // ASSERT
+    await expect.element(screen.getByText("Cell 0")).toHaveFocus();
+  });
+
+  it("ArrowRight moves focus horizontally in CSS grid", async () => {
+    // ARRANGE
+    const screen = render(
+      <RovingFocusGroup
+        orientation="grid"
+        style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
+      >
+        {Array.from({ length: 9 }, (_, i) => (
+          <RovingFocusItem key={i} style={{ width: 50, height: 50 }}>
+            Cell {i}
+          </RovingFocusItem>
+        ))}
+      </RovingFocusGroup>,
+    );
+    await userEvent.tab();
+
+    // ACT
+    await userEvent.keyboard("{ArrowRight}");
+
+    // ASSERT
+    await expect.element(screen.getByText("Cell 1")).toHaveFocus();
+  });
+
+  it("ArrowLeft moves focus back horizontally in CSS grid", async () => {
+    // ARRANGE
+    const screen = render(
+      <RovingFocusGroup
+        orientation="grid"
+        style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
+      >
+        {Array.from({ length: 9 }, (_, i) => (
+          <RovingFocusItem key={i} style={{ width: 50, height: 50 }}>
+            Cell {i}
+          </RovingFocusItem>
+        ))}
+      </RovingFocusGroup>,
+    );
+    await userEvent.tab();
+    await userEvent.keyboard("{ArrowRight}");
+
+    // ACT
+    await userEvent.keyboard("{ArrowLeft}");
+
+    // ASSERT
+    await expect.element(screen.getByText("Cell 0")).toHaveFocus();
+  });
+
+  it("ArrowDown moves focus vertically in CSS grid", async () => {
+    // ARRANGE
+    const screen = render(
+      <RovingFocusGroup
+        orientation="grid"
+        style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
+      >
+        {Array.from({ length: 9 }, (_, i) => (
+          <RovingFocusItem key={i} style={{ width: 50, height: 50 }}>
+            Cell {i}
+          </RovingFocusItem>
+        ))}
+      </RovingFocusGroup>,
+    );
+    await userEvent.tab();
+
+    // ACT
+    await userEvent.keyboard("{ArrowDown}");
+
+    // ASSERT - Cell 3 is directly below Cell 0 in a 3-column grid
+    await expect.element(screen.getByText("Cell 3")).toHaveFocus();
+  });
+
+  it("ArrowUp moves focus up vertically in CSS grid", async () => {
+    // ARRANGE
+    const screen = render(
+      <RovingFocusGroup
+        orientation="grid"
+        style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
+      >
+        {Array.from({ length: 9 }, (_, i) => (
+          <RovingFocusItem key={i} style={{ width: 50, height: 50 }}>
+            Cell {i}
+          </RovingFocusItem>
+        ))}
+      </RovingFocusGroup>,
+    );
+    await userEvent.tab();
+    await userEvent.keyboard("{ArrowDown}");
+
+    // ACT
+    await userEvent.keyboard("{ArrowUp}");
+
+    // ASSERT
+    await expect.element(screen.getByText("Cell 0")).toHaveFocus();
+  });
+
+  it("loops within row when loop=true", async () => {
+    // ARRANGE
+    const screen = render(
+      <RovingFocusGroup
+        orientation="grid"
+        loop={true}
+        style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
+      >
+        {Array.from({ length: 9 }, (_, i) => (
+          <RovingFocusItem key={i} style={{ width: 50, height: 50 }}>
+            Cell {i}
+          </RovingFocusItem>
+        ))}
+      </RovingFocusGroup>,
+    );
+    await userEvent.tab();
+    await userEvent.keyboard("{ArrowRight}");
+    await userEvent.keyboard("{ArrowRight}"); // now at Cell 2
+
+    // ACT
+    await userEvent.keyboard("{ArrowRight}"); // should loop to Cell 0
+
+    // ASSERT
+    await expect.element(screen.getByText("Cell 0")).toHaveFocus();
+  });
+
+  it("stops at row edge when loop=false", async () => {
+    // ARRANGE
+    const screen = render(
+      <RovingFocusGroup
+        orientation="grid"
+        loop={false}
+        style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
+      >
+        {Array.from({ length: 9 }, (_, i) => (
+          <RovingFocusItem key={i} style={{ width: 50, height: 50 }}>
+            Cell {i}
+          </RovingFocusItem>
+        ))}
+      </RovingFocusGroup>,
+    );
+    await userEvent.tab();
+    await userEvent.keyboard("{ArrowRight}");
+    await userEvent.keyboard("{ArrowRight}"); // now at Cell 2
+
+    // ACT
+    await userEvent.keyboard("{ArrowRight}"); // should stay at Cell 2
+
+    // ASSERT
+    await expect.element(screen.getByText("Cell 2")).toHaveFocus();
+  });
+
+  // ---------------------------------------------------------------------------
+  // (b) Responsive Layout with viewport changes
+  // ---------------------------------------------------------------------------
+
+  it("adapts navigation to new layout after viewport resize", async () => {
+    // ARRANGE - Use fixed columns that we can control
+    const screen = render(
+      <RovingFocusGroup
+        orientation="grid"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 50px)",
+        }}
+      >
+        {Array.from({ length: 9 }, (_, i) => (
+          <RovingFocusItem key={i} style={{ width: 50, height: 50 }}>
+            Cell {i}
+          </RovingFocusItem>
+        ))}
+      </RovingFocusGroup>,
+    );
+
+    await userEvent.tab();
+    await expect.element(screen.getByText("Cell 0")).toHaveFocus();
+
+    // ACT - navigate down in 3-column grid
+    await userEvent.keyboard("{ArrowDown}");
+
+    // ASSERT - Cell 3 is below Cell 0 in a 3-column grid
+    await expect.element(screen.getByText("Cell 3")).toHaveFocus();
+  });
+
+  it("maintains focus on same cell after resize", async () => {
+    // ARRANGE
+    const screen = render(
+      <RovingFocusGroup
+        orientation="grid"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(80px, 1fr))",
+          width: "100%",
+        }}
+      >
+        {Array.from({ length: 10 }, (_, i) => (
+          <RovingFocusItem key={i} style={{ width: 80, height: 50 }}>
+            Cell {i}
+          </RovingFocusItem>
+        ))}
+      </RovingFocusGroup>,
+    );
+
+    await page.viewport(1024, 768);
+    await userEvent.tab();
+    await userEvent.keyboard("{ArrowRight}");
+    await expect.element(screen.getByText("Cell 1")).toHaveFocus();
+
+    // ACT - resize
+    await page.viewport(400, 768);
+
+    // ASSERT - same cell still focused
+    await expect.element(screen.getByText("Cell 1")).toHaveFocus();
+  });
+
+  // ---------------------------------------------------------------------------
+  // (c) grid-auto-flow: dense - visual vs DOM order
+  // ---------------------------------------------------------------------------
+
+  it("navigates by visual position not DOM order with dense packing", async () => {
+    // ARRANGE - item 0 spans 2 columns, causing dense reorder
+    const screen = render(
+      <RovingFocusGroup
+        orientation="grid"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 50px)",
+          gridAutoFlow: "dense",
+        }}
+      >
+        <RovingFocusItem style={{ gridColumn: "span 2", height: 50 }}>
+          Wide
+        </RovingFocusItem>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>A</RovingFocusItem>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>B</RovingFocusItem>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>C</RovingFocusItem>
+      </RovingFocusGroup>,
+    );
+
+    await userEvent.tab();
+    // Visual layout with dense:
+    // Row 0: [Wide (spans 2)] [A]
+    // Row 1: [B] [C] [?]
+
+    // ACT - ArrowRight from Wide should go to A (same row visually)
+    await userEvent.keyboard("{ArrowRight}");
+
+    // ASSERT
+    await expect.element(screen.getByText("A")).toHaveFocus();
+  });
+
+  // ---------------------------------------------------------------------------
+  // (d) Dynamic Add/Remove (MutationObserver path)
+  // ---------------------------------------------------------------------------
+
+  it("updates navigation when item is added", async () => {
+    // ARRANGE
+    function DynamicGrid() {
+      const [items, setItems] = useState([0, 1, 2]);
+      return (
+        <>
+          <button onClick={() => setItems([0, 1, 99, 2])}>Add Item</button>
+          <RovingFocusGroup
+            orientation="grid"
+            style={{ display: "grid", gridTemplateColumns: "repeat(4, 50px)" }}
+          >
+            {items.map((i) => (
+              <RovingFocusItem key={i} style={{ width: 50, height: 50 }}>
+                Cell {i}
+              </RovingFocusItem>
+            ))}
+          </RovingFocusGroup>
+        </>
+      );
+    }
+
+    const screen = render(<DynamicGrid />);
+    // Wait for initial grid positions
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    await userEvent.tab(); // button
+    await userEvent.tab(); // grid
+
+    await expect.element(screen.getByText("Cell 0")).toHaveFocus();
+    await userEvent.keyboard("{ArrowRight}"); // focus Cell 1
+    await expect.element(screen.getByText("Cell 1")).toHaveFocus();
+
+    // ACT - add item
+    await screen.getByText("Add Item").click();
+
+    // Wait for rerender and recalc
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    // Focus should still be on Cell 1
+    // Navigate right to find Cell 99 (new item inserted after Cell 1)
+    await screen.getByText("Cell 1").element().focus();
+    await userEvent.keyboard("{ArrowRight}");
+
+    // ASSERT - navigation includes new item
+    await expect.element(screen.getByText("Cell 99")).toHaveFocus();
+  });
+
+  it("handles removal of items gracefully", async () => {
+    // ARRANGE - Test that grid still works after item removal
+    function DynamicGrid() {
+      const [items, setItems] = useState([0, 1, 2]);
+      return (
+        <>
+          <button onClick={() => setItems([0, 2])}>Remove Item 1</button>
+          <RovingFocusGroup
+            orientation="grid"
+            style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
+          >
+            {items.map((i) => (
+              <RovingFocusItem key={i} style={{ width: 50, height: 50 }}>
+                Cell {i}
+              </RovingFocusItem>
+            ))}
+          </RovingFocusGroup>
+        </>
+      );
+    }
+
+    const screen = render(<DynamicGrid />);
+    // Wait for initial grid positions
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    await userEvent.tab(); // button
+    await userEvent.tab(); // grid
+    await expect.element(screen.getByText("Cell 0")).toHaveFocus();
+
+    // ACT - remove an item
+    await screen.getByText("Remove Item 1").click();
+
+    // Wait for rerender and recalc
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    // Re-focus grid and navigate
+    await screen.getByText("Cell 0").element().focus();
+    await userEvent.keyboard("{ArrowRight}");
+
+    // ASSERT - navigation works, Cell 2 is next to Cell 0 now
+    await expect.element(screen.getByText("Cell 2")).toHaveFocus();
+  });
+
+  // ---------------------------------------------------------------------------
+  // (e) Non-Focusable Items
+  // ---------------------------------------------------------------------------
+
+  it("skips non-focusable items in auto-detected grid", async () => {
+    // ARRANGE
+    const screen = render(
+      <RovingFocusGroup
+        orientation="grid"
+        style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
+      >
+        <RovingFocusItem style={{ width: 50, height: 50 }}>A</RovingFocusItem>
+        <RovingFocusItem style={{ width: 50, height: 50 }} focusable={false}>
+          B
+        </RovingFocusItem>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>C</RovingFocusItem>
+      </RovingFocusGroup>,
+    );
+
+    // Wait for grid positions to be computed
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    await userEvent.tab();
+    await expect.element(screen.getByText("A")).toHaveFocus();
+
+    // ACT
+    await userEvent.keyboard("{ArrowRight}");
+
+    // ASSERT - skips B, goes to C
+    await expect.element(screen.getByText("C")).toHaveFocus();
+  });
+
+  it("non-focusable items have correct attributes in auto-detected grid", async () => {
+    // ARRANGE
+    const screen = render(
+      <RovingFocusGroup
+        orientation="grid"
+        style={{ display: "grid", gridTemplateColumns: "repeat(2, 50px)" }}
+      >
+        <RovingFocusItem style={{ width: 50, height: 50 }}>A</RovingFocusItem>
+        <RovingFocusItem style={{ width: 50, height: 50 }} focusable={false}>
+          B
+        </RovingFocusItem>
+      </RovingFocusGroup>,
+    );
+
+    // ASSERT
+    await expect
+      .element(screen.getByText("B"))
+      .toHaveAttribute("data-disabled", "true");
+    await expect
+      .element(screen.getByText("B"))
+      .toHaveAttribute("tabindex", "-1");
+  });
+
+  // ---------------------------------------------------------------------------
+  // (f) Nested Grids - separate groups
+  // ---------------------------------------------------------------------------
+
+  it("Tab moves between separate grid groups", async () => {
+    // ARRANGE
+    const screen = render(
+      <div>
+        <RovingFocusGroup
+          orientation="grid"
+          style={{ display: "grid", gridTemplateColumns: "repeat(2, 50px)" }}
+        >
+          <RovingFocusItem style={{ width: 50, height: 50 }}>G1-A</RovingFocusItem>
+          <RovingFocusItem style={{ width: 50, height: 50 }}>G1-B</RovingFocusItem>
+        </RovingFocusGroup>
+        <RovingFocusGroup
+          orientation="grid"
+          style={{ display: "grid", gridTemplateColumns: "repeat(2, 50px)" }}
+        >
+          <RovingFocusItem style={{ width: 50, height: 50 }}>G2-A</RovingFocusItem>
+          <RovingFocusItem style={{ width: 50, height: 50 }}>G2-B</RovingFocusItem>
+        </RovingFocusGroup>
+      </div>,
+    );
+
+    // ACT & ASSERT
+    await userEvent.tab();
+    await expect.element(screen.getByText("G1-A")).toHaveFocus();
+
+    await userEvent.tab();
+    await expect.element(screen.getByText("G2-A")).toHaveFocus();
+  });
+
+  it("arrow keys stay within their own grid group", async () => {
+    // ARRANGE
+    const screen = render(
+      <div>
+        <RovingFocusGroup
+          orientation="grid"
+          loop={false}
+          style={{ display: "grid", gridTemplateColumns: "repeat(2, 50px)" }}
+        >
+          <RovingFocusItem style={{ width: 50, height: 50 }}>G1-A</RovingFocusItem>
+          <RovingFocusItem style={{ width: 50, height: 50 }}>G1-B</RovingFocusItem>
+        </RovingFocusGroup>
+        <RovingFocusGroup
+          orientation="grid"
+          style={{ display: "grid", gridTemplateColumns: "repeat(2, 50px)" }}
+        >
+          <RovingFocusItem style={{ width: 50, height: 50 }}>G2-A</RovingFocusItem>
+          <RovingFocusItem style={{ width: 50, height: 50 }}>G2-B</RovingFocusItem>
+        </RovingFocusGroup>
+      </div>,
+    );
+
+    await userEvent.tab();
+    await userEvent.keyboard("{ArrowRight}"); // G1-B
+    await expect.element(screen.getByText("G1-B")).toHaveFocus();
+
+    // ACT - try to go further right (no loop)
+    await userEvent.keyboard("{ArrowRight}");
+
+    // ASSERT - stays in G1, doesn't jump to G2
+    await expect.element(screen.getByText("G1-B")).toHaveFocus();
+  });
+
+  // ---------------------------------------------------------------------------
+  // (g) Home/End/PageUp/PageDown in Auto-Detected Grid
+  // ---------------------------------------------------------------------------
+
+  it.each(["Home", "PageUp"])(
+    "%s moves to first focusable cell in auto-detected grid",
+    async (key) => {
+      // ARRANGE
+      const screen = render(
+        <RovingFocusGroup
+          orientation="grid"
+          style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
+        >
+          {Array.from({ length: 9 }, (_, i) => (
+            <RovingFocusItem key={i} style={{ width: 50, height: 50 }}>
+              Cell {i}
+            </RovingFocusItem>
+          ))}
+        </RovingFocusGroup>,
+      );
+      await userEvent.tab();
+      await userEvent.keyboard("{ArrowDown}");
+      await userEvent.keyboard("{ArrowRight}"); // at Cell 4
+
+      // ACT
+      await userEvent.keyboard(`{${key}}`);
+
+      // ASSERT
+      await expect.element(screen.getByText("Cell 0")).toHaveFocus();
+    },
+  );
+
+  it.each(["End", "PageDown"])(
+    "%s moves to last focusable cell in auto-detected grid",
+    async (key) => {
+      // ARRANGE
+      const screen = render(
+        <RovingFocusGroup
+          orientation="grid"
+          style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
+        >
+          {Array.from({ length: 9 }, (_, i) => (
+            <RovingFocusItem key={i} style={{ width: 50, height: 50 }}>
+              Cell {i}
+            </RovingFocusItem>
+          ))}
+        </RovingFocusGroup>,
+      );
+      await userEvent.tab();
+
+      // ACT
+      await userEvent.keyboard(`{${key}}`);
+
+      // ASSERT
+      await expect.element(screen.getByText("Cell 8")).toHaveFocus();
+    },
+  );
+
+  it("Home skips unfocusable first cell in auto-detected grid", async () => {
+    // ARRANGE
+    const screen = render(
+      <RovingFocusGroup
+        orientation="grid"
+        style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
+      >
+        <RovingFocusItem style={{ width: 50, height: 50 }} focusable={false}>
+          Cell 0
+        </RovingFocusItem>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
+          Cell 1
+        </RovingFocusItem>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
+          Cell 2
+        </RovingFocusItem>
+      </RovingFocusGroup>,
+    );
+    await userEvent.tab();
+    await userEvent.keyboard("{ArrowRight}"); // at Cell 2
+
+    // ACT
+    await userEvent.keyboard("{Home}");
+
+    // ASSERT - skips Cell 0 (unfocusable), goes to Cell 1
+    await expect.element(screen.getByText("Cell 1")).toHaveFocus();
+  });
+
+  it("End skips unfocusable last cell in auto-detected grid", async () => {
+    // ARRANGE
+    const screen = render(
+      <RovingFocusGroup
+        orientation="grid"
+        style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
+      >
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
+          Cell 0
+        </RovingFocusItem>
+        <RovingFocusItem style={{ width: 50, height: 50 }}>
+          Cell 1
+        </RovingFocusItem>
+        <RovingFocusItem style={{ width: 50, height: 50 }} focusable={false}>
+          Cell 2
+        </RovingFocusItem>
+      </RovingFocusGroup>,
+    );
+    await userEvent.tab();
+
+    // ACT
+    await userEvent.keyboard("{End}");
+
+    // ASSERT - skips Cell 2 (unfocusable), goes to Cell 1
+    await expect.element(screen.getByText("Cell 1")).toHaveFocus();
   });
 });

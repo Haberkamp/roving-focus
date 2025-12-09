@@ -6,7 +6,7 @@ import {
   useRef,
   MouseEvent,
 } from "react";
-import { useRovingFocus, GridPosition } from "./RovingFocusGroup";
+import { useRovingFocus } from "./RovingFocusGroup";
 import { Slot } from "@radix-ui/react-slot";
 
 export type RovingFocusItemProps = {
@@ -14,7 +14,6 @@ export type RovingFocusItemProps = {
   as?: React.ElementType;
   focusable?: boolean;
   active?: boolean;
-  position?: GridPosition;
 } & ComponentPropsWithoutRef<"span">;
 
 export function RovingFocusItem({
@@ -24,7 +23,6 @@ export function RovingFocusItem({
   as = "span",
   focusable = true,
   active = false,
-  position,
   ...props
 }: RovingFocusItemProps) {
   const id = useId();
@@ -45,15 +43,8 @@ export function RovingFocusItem({
     setDefaultActiveItem,
   } = useRovingFocus();
 
-  // Validate grid position requirement
-  if (orientation === "grid" && !position) {
-    throw new Error(
-      "RovingFocusItem in grid orientation must define a position: { row, column }",
-    );
-  }
-
   useEffect(() => {
-    const itemIndex = registerItem(id, { focusable, position });
+    const itemIndex = registerItem(id, { focusable });
 
     if (active) {
       setDefaultActiveItem(itemIndex);
@@ -62,9 +53,9 @@ export function RovingFocusItem({
     return () => {
       unregisterItem(id);
     };
-  }, [id, focusable, active, position?.row, position?.column]);
+  }, [id, focusable, active]);
 
-  const tabIndex = getTabIndex(registerItem(id, { focusable, position }));
+  const tabIndex = getTabIndex(registerItem(id, { focusable }));
 
   const ref = useRef<HTMLSpanElement>(null);
 
@@ -92,7 +83,7 @@ export function RovingFocusItem({
   };
 
   const handleClick = (event: MouseEvent<HTMLSpanElement>) => {
-    if (focusable) setCurrentIndex(registerItem(id, { focusable, position }));
+    if (focusable) setCurrentIndex(registerItem(id, { focusable }));
 
     onClick?.(event);
   };

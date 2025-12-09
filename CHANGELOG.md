@@ -1,5 +1,16 @@
 # @roving-focus/react
 
+## 2.0.0
+
+### Breaking Changes
+
+- Removed `GridPosition` export from public API
+- Removed `position` prop from `RovingFocusItem`
+
+Grid navigation now auto-detects item positions from the DOM layout using `getBoundingClientRect()`.
+
+**Migration:** Remove all `position={{ row, column }}` props from `RovingFocusItem` components. Ensure your grid container uses CSS Grid (`display: grid`) — the component will derive positions automatically.
+
 ## 1.1.1
 
 ### Patch Changes
