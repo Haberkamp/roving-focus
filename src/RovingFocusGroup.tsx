@@ -147,8 +147,10 @@ export function RovingFocusGroup({
   useEffect(() => {
     if (orientation !== "grid" || !groupRef.current) return;
 
-    // Initial compute
-    scheduleRecalc();
+    // Initial compute - do this synchronously to ensure positions are ready
+    // before any keyboard events. RAF-based scheduleRecalc is unreliable
+    // in Firefox/WebKit where RAF may not fire before event handlers.
+    computeGridPositions();
 
     const container = groupRef.current;
 
@@ -662,6 +664,52 @@ export function RovingFocusGroup({
   };
 
   const Component = asChild ? Slot : as;
+
+  // Ensure focus moves from a scrollable parent into the roving items.
+  // Firefox can give focus to the scrollable container (e.g. a div with
+  // overflow:auto) instead of the first focusable item inside the group.
+  // When that happens, we immediately redirect focus to the current / first
+  // focusable roving item so keyboard navigation works consistently.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    const handleFocusIn = (event: FocusEvent) => {
+      const group = groupRef.current;
+      if (!group) return;
+
+      const scrollableParent = getScrollableParent(group);
+      if (!scrollableParent) return;
+
+      if (event.target !== scrollableParent) return;
+
+      // Prefer the current index if it's a focusable item, otherwise fall back
+      // to the first focusable item in the group.
+      let targetIndex = currentIndex;
+      const currentItem = registeredItems.current[targetIndex];
+      if (!currentItem || !currentItem.focusable) {
+        targetIndex = findFirstFocusableIndex();
+      }
+
+      if (targetIndex === -1) return;
+
+      const targetItem = registeredItems.current[targetIndex];
+      if (!targetItem) return;
+
+      const element = group.querySelector(
+        `[data-roving-focus-item="${targetItem.id}"]`,
+      ) as HTMLElement | null;
+
+      if (element && document.activeElement !== element) {
+        element.focus({ preventScroll: true });
+        scrollIntoViewIfNeeded(element);
+      }
+    };
+
+    document.addEventListener("focusin", handleFocusIn);
+    return () => {
+      document.removeEventListener("focusin", handleFocusIn);
+    };
+  }, [currentIndex]);
 
   return (
     <RovingFocusContext.Provider value={contextValue}>
