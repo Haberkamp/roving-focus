@@ -28,7 +28,7 @@ export function InstallSnippet() {
         type="button"
         onClick={copy}
         aria-label={copied ? "Copied" : "Copy install command"}
-        className="grid size-7 shrink-0 place-items-center rounded-md text-neutral-400 hover:bg-neutral-200/60 hover:text-neutral-700 focus-visible:bg-lime-300 focus-visible:text-neutral-900 focus-visible:outline-hidden"
+        className="grid size-7 shrink-0 place-items-center rounded-md text-neutral-400 hover:bg-neutral-200/60 hover:text-neutral-700 focus-visible:text-neutral-700 focus-visible:outline-2 focus-visible:outline-lime-300"
       >
         {copied ? (
           <svg
