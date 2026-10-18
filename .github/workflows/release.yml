@@ -69,4 +69,3 @@ jobs:
 
       - name: Publish to npm
         run: npm publish --provenance --access public --tag ${{ steps.dist-tag.outputs.tag }}
-
