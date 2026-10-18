@@ -1,5 +1,12 @@
 # @roving-focus/react
 
+## [2.0.0](https://github.com/Haberkamp/roving-focus/compare/v2.0.0-0...v2.0.0) (2026-10-18)
+
+
+### Bug Fixes
+
+* id-based tab stop, DOM-order registration, composed handlers and refs, ESM packaging ([db53825](https://github.com/Haberkamp/roving-focus/commit/db538250f85f555596fe3c3c8112a3a198024d2c))
+
 ## 2.0.0
 
 ### Breaking Changes
