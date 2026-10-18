@@ -298,12 +298,12 @@ it("stops at the first item when pressing the left arrow key on the first item a
     .toHaveAttribute("tabindex", "-1");
 });
 
-it.each(["PageDown", "End"])(
+it.each(["End"])(
   "focuses the last item when pressing the %s key",
   async (key) => {
     // ARRANGE
     const screen = await render(
-      <RovingFocusGroup pageNavigation>
+      <RovingFocusGroup>
         <RovingFocusItem>Item 1</RovingFocusItem>
         <RovingFocusItem>Item 2</RovingFocusItem>
         <RovingFocusItem>Item 3</RovingFocusItem>
@@ -333,12 +333,12 @@ it.each(["PageDown", "End"])(
   },
 );
 
-it.each(["PageUp", "Home"])(
+it.each(["Home"])(
   "focuses the first item when pressing the %s key",
   async (key) => {
     // ARRANGE
     const screen = await render(
-      <RovingFocusGroup pageNavigation>
+      <RovingFocusGroup>
         <RovingFocusItem>Item 1</RovingFocusItem>
         <RovingFocusItem>Item 2</RovingFocusItem>
         <RovingFocusItem>Item 3</RovingFocusItem>
@@ -346,7 +346,7 @@ it.each(["PageUp", "Home"])(
     );
 
     await userEvent.tab();
-    await userEvent.keyboard("{PageDown}");
+    await userEvent.keyboard("{End}");
 
     // ACT
     await userEvent.keyboard(`{${key}}`);
@@ -1455,16 +1455,12 @@ describe("grid orientation", () => {
   // Home / End Navigation (Entire Grid)
   // ---------------------------------------------------------------------------
 
-  it.each(["Home", "PageUp"])(
+  it.each(["Home"])(
     "focuses first focusable cell in grid when pressing %s",
     async (key) => {
       // ARRANGE - 2x2 grid
       const screen = render(
-        <RovingFocusGroup
-          pageNavigation
-          orientation="grid"
-          style={gridStyle(2)}
-        >
+        <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
           <RovingFocusItem style={{ width: 50, height: 50 }}>
             Cell 0,0
           </RovingFocusItem>
@@ -1494,16 +1490,12 @@ describe("grid orientation", () => {
     },
   );
 
-  it.each(["End", "PageDown"])(
+  it.each(["End"])(
     "focuses last focusable cell in grid when pressing %s",
     async (key) => {
       // ARRANGE - 2x2 grid
       const screen = render(
-        <RovingFocusGroup
-          pageNavigation
-          orientation="grid"
-          style={gridStyle(2)}
-        >
+        <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
           <RovingFocusItem style={{ width: 50, height: 50 }}>
             Cell 0,0
           </RovingFocusItem>
@@ -2346,16 +2338,15 @@ describe("grid orientation - auto-detection", () => {
   });
 
   // ---------------------------------------------------------------------------
-  // (g) Home/End/PageUp/PageDown in Auto-Detected Grid
+  // (g) Home/End in Auto-Detected Grid
   // ---------------------------------------------------------------------------
 
-  it.each(["Home", "PageUp"])(
+  it.each(["Home"])(
     "%s moves to first focusable cell in auto-detected grid",
     async (key) => {
       // ARRANGE
       const screen = render(
         <RovingFocusGroup
-          pageNavigation
           orientation="grid"
           style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
         >
@@ -2378,13 +2369,12 @@ describe("grid orientation - auto-detection", () => {
     },
   );
 
-  it.each(["End", "PageDown"])(
+  it.each(["End"])(
     "%s moves to last focusable cell in auto-detected grid",
     async (key) => {
       // ARRANGE
       const screen = render(
         <RovingFocusGroup
-          pageNavigation
           orientation="grid"
           style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
         >

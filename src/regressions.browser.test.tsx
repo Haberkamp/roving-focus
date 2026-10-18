@@ -232,7 +232,7 @@ describe.each([
     expect(groupRef.current?.hasAttribute("data-testid")).toBe(false);
   });
 
-  it("does not hijack PageDown by default", async () => {
+  it("does not move focus on PageDown", async () => {
     const screen = await render(<List items={["Item 1", "Item 2"]} />, {
       wrapper,
     });

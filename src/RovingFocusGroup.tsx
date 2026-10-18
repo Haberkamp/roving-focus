@@ -50,11 +50,6 @@ export type RovingFocusGroupProps = {
   orientation?: "horizontal" | "vertical" | "grid";
   as?: React.ElementType;
   asChild?: boolean;
-  /**
-   * Let `PageUp` / `PageDown` move focus to the first / last item, like
-   * `Home` / `End`. Off by default so they keep scrolling the page.
-   */
-  pageNavigation?: boolean;
 } & ComponentPropsWithoutRef<"div">;
 
 const byDomOrder = (a: RegisteredItem, b: RegisteredItem) =>
@@ -93,7 +88,6 @@ export const RovingFocusGroup = forwardRef<HTMLElement, RovingFocusGroupProps>(
       loop = true,
       orientation = "horizontal",
       as = "div",
-      pageNavigation = false,
       ...props
     },
     forwardedRef,
@@ -307,9 +301,7 @@ export const RovingFocusGroup = forwardRef<HTMLElement, RovingFocusGroupProps>(
         return;
       }
 
-      let key = event.key;
-      if (pageNavigation && key === "PageUp") key = "Home";
-      if (pageNavigation && key === "PageDown") key = "End";
+      const key = event.key;
 
       const keys =
         orientation === "grid"
