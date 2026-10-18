@@ -1,42 +1,35 @@
 import { Slot } from "@radix-ui/react-slot";
 import {
   ComponentPropsWithoutRef,
+  KeyboardEvent,
   createContext,
-  useContext,
-  useState,
-  useRef,
-  useEffect,
+  forwardRef,
   useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
 } from "react";
+import { useMergedRefs } from "./mergeRefs.js";
 
 export type GridPosition = { row: number; column: number };
 
-type RegisterItemOptions = {
-  focusable?: boolean;
-};
-
 type RegisteredItem = {
   id: string;
+  element: HTMLElement;
   focusable: boolean;
 };
 
 type RovingFocusContextType = {
-  currentIndex: number;
-  setCurrentIndex: (index: number) => void;
-  registerItem: (id: string, options?: RegisterItemOptions) => number;
+  /** The id of the item that currently has `tabIndex=0`, derived at render. */
+  tabStopId: string | null;
+  setActiveId: (id: string) => void;
+  registerItem: (item: RegisteredItem) => void;
   unregisterItem: (id: string) => void;
-  getTabIndex: (itemIndex: number) => number;
-  focusNextItem: () => void;
-  focusPreviousItem: () => void;
-  focusLastItem: () => void;
-  focusFirstItem: () => void;
-  focusRight: () => void;
-  focusLeft: () => void;
-  focusDown: () => void;
-  focusUp: () => void;
   orientation: "horizontal" | "vertical" | "grid";
   loop: boolean;
-  setDefaultActiveItem: (index: number) => void;
+  setDefaultActiveItem: (id: string) => void;
 };
 
 const RovingFocusContext = createContext<RovingFocusContextType | null>(null);
@@ -49,676 +42,344 @@ export const useRovingFocus = () => {
   return context;
 };
 
+export const useIsomorphicLayoutEffect =
+  typeof document === "undefined" ? useEffect : useLayoutEffect;
+
 export type RovingFocusGroupProps = {
   loop?: boolean;
   orientation?: "horizontal" | "vertical" | "grid";
   as?: React.ElementType;
   asChild?: boolean;
+  /**
+   * Let `PageUp` / `PageDown` move focus to the first / last item, like
+   * `Home` / `End`. Off by default so they keep scrolling the page.
+   */
+  pageNavigation?: boolean;
 } & ComponentPropsWithoutRef<"div">;
 
-export function RovingFocusGroup({
-  asChild = false,
-  onKeyDown,
-  loop = true,
-  orientation = "horizontal",
-  as = "div",
-  ...props
-}: RovingFocusGroupProps) {
-  const [currentIndex, setCurrentIndex] = useState(-1);
-  const registeredItems = useRef<RegisteredItem[]>([]);
-  const groupRef = useRef<HTMLDivElement>(null);
-  const hasDefaultActiveItem = useRef(false);
-
-  // Grid auto-detection refs
-  const gridPositionsRef = useRef<Map<string, GridPosition>>(new Map());
-  const recalcScheduled = useRef(false);
-
-  const findFirstFocusableIndex = (): number => {
-    for (let i = 0; i < registeredItems.current.length; i++) {
-      const item = registeredItems.current[i];
-      if (item && item.focusable) {
-        return i;
-      }
-    }
-    return -1;
-  };
-
-  // Compute grid positions from DOM
-  const computeGridPositions = useCallback(() => {
-    if (orientation !== "grid" || !groupRef.current) return;
-
-    const elements = groupRef.current.querySelectorAll(
-      "[data-roving-focus-item]",
-    );
-    if (elements.length === 0) return;
-
-    const items: { id: string; rect: DOMRect }[] = [];
-    elements.forEach((el) => {
-      const id = el.getAttribute("data-roving-focus-item");
-      if (id) {
-        items.push({ id, rect: el.getBoundingClientRect() });
-      }
-    });
-
-    if (items.length === 0) return;
-
-    // Calculate row threshold based on smallest item height
-    const minHeight = Math.min(...items.map((item) => item.rect.height));
-    const rowThreshold = Math.max(minHeight / 2, 1);
-
-    // Sort by top, then left
-    items.sort((a, b) => {
-      const topDiff = a.rect.top - b.rect.top;
-      if (Math.abs(topDiff) > rowThreshold) return topDiff;
-      return a.rect.left - b.rect.left;
-    });
-
-    // Cluster into rows
-    const newPositions = new Map<string, GridPosition>();
-    let currentRow = 0;
-    let currentColumn = 0;
-    let currentRowTop = items[0]?.rect.top ?? 0;
-
-    for (const item of items) {
-      if (Math.abs(item.rect.top - currentRowTop) > rowThreshold) {
-        currentRow++;
-        currentColumn = 0;
-        currentRowTop = item.rect.top;
-      }
-      newPositions.set(item.id, { row: currentRow, column: currentColumn });
-      currentColumn++;
-    }
-
-    gridPositionsRef.current = newPositions;
-  }, [orientation]);
-
-  // Debounced recalc scheduler
-  const scheduleRecalc = useCallback(() => {
-    if (typeof requestAnimationFrame === "undefined") return;
-    if (recalcScheduled.current) return;
-    recalcScheduled.current = true;
-    requestAnimationFrame(() => {
-      recalcScheduled.current = false;
-      computeGridPositions();
-    });
-  }, [computeGridPositions]);
-
-  // Observers for grid mode
-  useEffect(() => {
-    if (orientation !== "grid" || !groupRef.current) return;
-
-    // Initial compute - do this synchronously to ensure positions are ready
-    // before any keyboard events. RAF-based scheduleRecalc is unreliable
-    // in Firefox/WebKit where RAF may not fire before event handlers.
-    computeGridPositions();
-
-    const container = groupRef.current;
-
-    // ResizeObserver
-    const resizeObserver = new ResizeObserver(() => {
-      scheduleRecalc();
-    });
-    resizeObserver.observe(container);
-
-    // MutationObserver
-    const mutationObserver = new MutationObserver(() => {
-      scheduleRecalc();
-    });
-    mutationObserver.observe(container, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ["class", "style", "data-roving-focus-item"],
-    });
-
-    return () => {
-      resizeObserver.disconnect();
-      mutationObserver.disconnect();
-    };
-  }, [orientation, scheduleRecalc]);
-
-  const registerItem = (id: string, options?: RegisterItemOptions): number => {
-    const focusable = options?.focusable ?? true;
-
-    const existingIndex = registeredItems.current.findIndex(
-      (item) => item.id === id,
-    );
-    if (existingIndex === -1) {
-      registeredItems.current.push({ id, focusable });
-    } else {
-      // Update in place to maintain stable index for focus stability
-      registeredItems.current[existingIndex] = { id, focusable };
-    }
-
-    if (orientation === "grid") {
-      scheduleRecalc();
-    }
-
-    return registeredItems.current.findIndex((item) => item.id === id);
-  };
-
-  const unregisterItem = (id: string): void => {
-    const index = registeredItems.current.findIndex((item) => item.id === id);
-    if (index > -1) {
-      registeredItems.current.splice(index, 1);
-    }
-
-    if (orientation === "grid") {
-      scheduleRecalc();
-    }
-  };
-
-  const getTabIndex = (itemIndex: number): number => {
-    const item = registeredItems.current[itemIndex];
-    if (!item || !item.focusable) {
-      return -1;
-    }
-    return itemIndex === currentIndex ? 0 : -1;
-  };
-
-  // Update currentIndex when items are registered and currentIndex is -1
-  useEffect(() => {
-    if (
-      currentIndex === -1 &&
-      registeredItems.current.length > 0 &&
-      !hasDefaultActiveItem.current
-    ) {
-      const firstFocusableIndex = findFirstFocusableIndex();
-      if (firstFocusableIndex !== -1) {
-        setCurrentIndex(firstFocusableIndex);
-      }
-    }
-  }, [currentIndex]);
-
-  const getNextFocusableIndex = (
-    startIndex: number,
-    direction: 1 | -1,
-  ): number => {
-    const length = registeredItems.current.length;
-    if (length === 0) return startIndex;
-
-    // If startIndex is -1, find the first focusable item
-    if (startIndex === -1) {
-      return findFirstFocusableIndex();
-    }
-
-    let index = startIndex;
-    let attempts = 0;
-
-    do {
-      index = loop
-        ? (index + direction + length) % length
-        : Math.max(0, Math.min(index + direction, length - 1));
-
-      attempts++;
-      if (attempts > length) break; // Prevent infinite loop
-
-      const item = registeredItems.current[index];
-      if (item && item.focusable) {
-        return index;
-      }
-    } while (index !== startIndex || loop);
-
-    return startIndex;
-  };
-
-  const focusNextItem = () => {
-    const nextIndex = getNextFocusableIndex(currentIndex, 1);
-    setCurrentIndex(nextIndex);
-
-    const nextItem = registeredItems.current[nextIndex];
-    if (nextItem) {
-      const nextItemElement = groupRef.current?.querySelector(
-        `[data-roving-focus-item="${nextItem.id}"]`,
-      );
-
-      if (nextItemElement) {
-        (nextItemElement as HTMLElement).focus({ preventScroll: true });
-        scrollIntoViewIfNeeded(nextItemElement as HTMLElement);
-      }
-    }
-  };
-
-  const focusPreviousItem = () => {
-    const previousIndex = getNextFocusableIndex(currentIndex, -1);
-    setCurrentIndex(previousIndex);
-
-    const previousItem = registeredItems.current[previousIndex];
-    if (previousItem) {
-      const previousItemElement = groupRef.current?.querySelector(
-        `[data-roving-focus-item="${previousItem.id}"]`,
-      );
-
-      if (previousItemElement) {
-        (previousItemElement as HTMLElement).focus({ preventScroll: true });
-        scrollIntoViewIfNeeded(previousItemElement as HTMLElement);
-      }
-    }
-  };
-
-  const focusFirstItem = () => {
-    if (orientation === "grid") {
-      const idx = findGridFirstFocusable();
-      if (idx !== -1) {
-        focusItemAtIndex(idx);
-      }
-      return;
-    }
-    // Find the first focusable item
-    for (let i = 0; i < registeredItems.current.length; i++) {
-      const item = registeredItems.current[i];
-      if (item && item.focusable) {
-        setCurrentIndex(i);
-        const firstItemElement = groupRef.current?.querySelector(
-          `[data-roving-focus-item="${item.id}"]`,
-        );
-        if (firstItemElement) {
-          (firstItemElement as HTMLElement).focus({ preventScroll: true });
-          scrollIntoViewIfNeeded(firstItemElement as HTMLElement);
-        }
-        return;
-      }
-    }
-  };
-
-  const focusLastItem = () => {
-    if (orientation === "grid") {
-      const idx = findGridLastFocusable();
-      if (idx !== -1) {
-        focusItemAtIndex(idx);
-      }
-      return;
-    }
-    // Find the last focusable item
-    for (let i = registeredItems.current.length - 1; i >= 0; i--) {
-      const item = registeredItems.current[i];
-      if (item && item.focusable) {
-        setCurrentIndex(i);
-        const lastItemElement = groupRef.current?.querySelector(
-          `[data-roving-focus-item="${item.id}"]`,
-        );
-        if (lastItemElement) {
-          (lastItemElement as HTMLElement).focus({ preventScroll: true });
-          scrollIntoViewIfNeeded(lastItemElement as HTMLElement);
-        }
-        return;
-      }
-    }
-  };
-
-  // Find nearest scrollable parent (not the page itself)
-  const getScrollableParent = (element: HTMLElement): HTMLElement | null => {
-    let parent = element.parentElement;
-    while (parent && parent !== document.body) {
-      const { overflow, overflowY, overflowX } = getComputedStyle(parent);
-      if (/(auto|scroll)/.test(overflow + overflowY + overflowX)) {
-        return parent;
-      }
-      parent = parent.parentElement;
-    }
-    return null;
-  };
-
-  // Scroll element into view within scrollable container or page
-  const scrollIntoViewIfNeeded = (element: HTMLElement) => {
-    const scrollableParent = getScrollableParent(element);
-    const padding = 20;
-
-    if (!scrollableParent) {
-      // No scrollable parent — scroll the page itself
-      const rect = element.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      const viewportWidth = window.innerWidth;
-
-      let scrollX = window.scrollX;
-      let scrollY = window.scrollY;
-
-      if (rect.bottom + padding > viewportHeight) {
-        scrollY += rect.bottom + padding - viewportHeight;
-      } else if (rect.top - padding < 0) {
-        scrollY += rect.top - padding;
-      }
-
-      if (rect.right + padding > viewportWidth) {
-        scrollX += rect.right + padding - viewportWidth;
-      } else if (rect.left - padding < 0) {
-        scrollX += rect.left - padding;
-      }
-
-      window.scrollTo(scrollX, scrollY);
-      return;
-    }
-
-    const parentRect = scrollableParent.getBoundingClientRect();
-    const elementRect = element.getBoundingClientRect();
-
-    // Check if element is outside visible area of scrollable parent
-    if (elementRect.bottom + padding > parentRect.bottom) {
-      scrollableParent.scrollTop +=
-        elementRect.bottom + padding - parentRect.bottom;
-    } else if (elementRect.top - padding < parentRect.top) {
-      scrollableParent.scrollTop -= parentRect.top - elementRect.top + padding;
-    }
-
-    if (elementRect.right + padding > parentRect.right) {
-      scrollableParent.scrollLeft +=
-        elementRect.right + padding - parentRect.right;
-    } else if (elementRect.left - padding < parentRect.left) {
-      scrollableParent.scrollLeft -=
-        parentRect.left - elementRect.left + padding;
-    }
-  };
-
-  // Grid navigation helpers
-  const focusItemAtIndex = (index: number) => {
-    setCurrentIndex(index);
-    const item = registeredItems.current[index];
-    if (item) {
-      const element = groupRef.current?.querySelector(
-        `[data-roving-focus-item="${item.id}"]`,
-      );
-      if (element) {
-        (element as HTMLElement).focus({ preventScroll: true });
-        scrollIntoViewIfNeeded(element as HTMLElement);
-      }
-    }
-  };
-
-  const getPosition = (id: string): GridPosition | undefined => {
-    return gridPositionsRef.current.get(id);
-  };
-
-  const getRowPeers = (row: number) => {
-    return registeredItems.current
-      .map((item, index) => ({
-        ...item,
-        index,
-        position: getPosition(item.id),
-      }))
-      .filter((item) => item.position?.row === row)
-      .sort((a, b) => (a.position?.column ?? 0) - (b.position?.column ?? 0));
-  };
-
-  const getColumnPeers = (column: number) => {
-    return registeredItems.current
-      .map((item, index) => ({
-        ...item,
-        index,
-        position: getPosition(item.id),
-      }))
-      .filter((item) => item.position?.column === column)
-      .sort((a, b) => (a.position?.row ?? 0) - (b.position?.row ?? 0));
-  };
-
-  const findGridFirstFocusable = (): number => {
-    const focusableItems = registeredItems.current
-      .map((item, index) => ({
-        ...item,
-        index,
-        position: getPosition(item.id),
-      }))
-      .filter((item) => item.focusable && item.position);
-
-    if (focusableItems.length === 0) return -1;
-
-    focusableItems.sort((a, b) => {
-      const rowDiff = (a.position?.row ?? 0) - (b.position?.row ?? 0);
-      if (rowDiff !== 0) return rowDiff;
-      return (a.position?.column ?? 0) - (b.position?.column ?? 0);
-    });
-
-    return focusableItems[0]?.index ?? -1;
-  };
-
-  const findGridLastFocusable = (): number => {
-    const focusableItems = registeredItems.current
-      .map((item, index) => ({
-        ...item,
-        index,
-        position: getPosition(item.id),
-      }))
-      .filter((item) => item.focusable && item.position);
-
-    if (focusableItems.length === 0) return -1;
-
-    focusableItems.sort((a, b) => {
-      const rowDiff = (b.position?.row ?? 0) - (a.position?.row ?? 0);
-      if (rowDiff !== 0) return rowDiff;
-      return (b.position?.column ?? 0) - (a.position?.column ?? 0);
-    });
-
-    return focusableItems[0]?.index ?? -1;
-  };
-
-  const focusRight = () => {
-    const current = registeredItems.current[currentIndex];
-    if (!current) return;
-    const currentPos = getPosition(current.id);
-    if (!currentPos) return;
-
-    const rowPeers = getRowPeers(currentPos.row);
-    const currentPeerIdx = rowPeers.findIndex((p) => p.index === currentIndex);
-
-    // Find next focusable in row
-    for (let i = currentPeerIdx + 1; i < rowPeers.length; i++) {
-      if (rowPeers[i]?.focusable) {
-        focusItemAtIndex(rowPeers[i].index);
-        return;
-      }
-    }
-
-    // At end of row
-    if (loop) {
-      // Loop to first focusable in row
-      for (let i = 0; i < currentPeerIdx; i++) {
-        if (rowPeers[i]?.focusable) {
-          focusItemAtIndex(rowPeers[i].index);
-          return;
-        }
-      }
-    }
-  };
-
-  const focusLeft = () => {
-    const current = registeredItems.current[currentIndex];
-    if (!current) return;
-    const currentPos = getPosition(current.id);
-    if (!currentPos) return;
-
-    const rowPeers = getRowPeers(currentPos.row);
-    const currentPeerIdx = rowPeers.findIndex((p) => p.index === currentIndex);
-
-    // Find previous focusable in row
-    for (let i = currentPeerIdx - 1; i >= 0; i--) {
-      if (rowPeers[i]?.focusable) {
-        focusItemAtIndex(rowPeers[i].index);
-        return;
-      }
-    }
-
-    // At start of row
-    if (loop) {
-      // Loop to last focusable in row
-      for (let i = rowPeers.length - 1; i > currentPeerIdx; i--) {
-        if (rowPeers[i]?.focusable) {
-          focusItemAtIndex(rowPeers[i].index);
-          return;
-        }
-      }
-    }
-  };
-
-  const focusDown = () => {
-    const current = registeredItems.current[currentIndex];
-    if (!current) return;
-    const currentPos = getPosition(current.id);
-    if (!currentPos) return;
-
-    const colPeers = getColumnPeers(currentPos.column);
-    const currentPeerIdx = colPeers.findIndex((p) => p.index === currentIndex);
-
-    // Find next focusable in column
-    for (let i = currentPeerIdx + 1; i < colPeers.length; i++) {
-      if (colPeers[i]?.focusable) {
-        focusItemAtIndex(colPeers[i].index);
-        return;
-      }
-    }
-
-    // At end of column
-    if (loop) {
-      // Loop to first focusable in column
-      for (let i = 0; i < currentPeerIdx; i++) {
-        if (colPeers[i]?.focusable) {
-          focusItemAtIndex(colPeers[i].index);
-          return;
-        }
-      }
-    }
-  };
-
-  const focusUp = () => {
-    const current = registeredItems.current[currentIndex];
-    if (!current) return;
-    const currentPos = getPosition(current.id);
-    if (!currentPos) return;
-
-    const colPeers = getColumnPeers(currentPos.column);
-    const currentPeerIdx = colPeers.findIndex((p) => p.index === currentIndex);
-
-    // Find previous focusable in column
-    for (let i = currentPeerIdx - 1; i >= 0; i--) {
-      if (colPeers[i]?.focusable) {
-        focusItemAtIndex(colPeers[i].index);
-        return;
-      }
-    }
-
-    // At start of column
-    if (loop) {
-      // Loop to last focusable in column
-      for (let i = colPeers.length - 1; i > currentPeerIdx; i--) {
-        if (colPeers[i]?.focusable) {
-          focusItemAtIndex(colPeers[i].index);
-          return;
-        }
-      }
-    }
-  };
-
-  const setDefaultActiveItem = (index: number) => {
-    hasDefaultActiveItem.current = true;
-    const item = registeredItems.current[index];
-
-    if (item && !item.focusable) {
-      console.warn(
-        "The default active item is unfocusable. This is not recommended.",
-      );
-
-      // Find the next focusable item after the given index
-      for (let i = index + 1; i < registeredItems.current.length; i++) {
-        const nextItem = registeredItems.current[i];
-        if (nextItem && nextItem.focusable) {
-          setCurrentIndex(i);
-          return;
-        }
-      }
-
-      // If no focusable item found after, look before the given index
-      for (let i = index - 1; i >= 0; i--) {
-        const prevItem = registeredItems.current[i];
-        if (prevItem && prevItem.focusable) {
-          setCurrentIndex(i);
-          return;
-        }
-      }
-
-      // If still no focusable item found, find the first focusable item
-      const firstFocusableIndex = findFirstFocusableIndex();
-      if (firstFocusableIndex !== -1) {
-        setCurrentIndex(firstFocusableIndex);
-        return;
-      }
-    }
-
-    setCurrentIndex(index);
-  };
-
-  const contextValue: RovingFocusContextType = {
-    currentIndex,
-    setCurrentIndex,
-    registerItem,
-    unregisterItem,
-    getTabIndex,
-    focusNextItem,
-    focusPreviousItem,
-    focusLastItem,
-    focusFirstItem,
-    focusRight,
-    focusLeft,
-    focusDown,
-    focusUp,
-    orientation,
-    loop,
-    setDefaultActiveItem,
-  };
-
-  const Component = asChild ? Slot : as;
-
-  // Ensure focus moves from a scrollable parent into the roving items.
-  // Firefox can give focus to the scrollable container (e.g. a div with
-  // overflow:auto) instead of the first focusable item inside the group.
-  // When that happens, we immediately redirect focus to the current / first
-  // focusable roving item so keyboard navigation works consistently.
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-
-    const handleFocusIn = (event: FocusEvent) => {
-      const group = groupRef.current;
-      if (!group) return;
-
-      const scrollableParent = getScrollableParent(group);
-      if (!scrollableParent) return;
-
-      if (event.target !== scrollableParent) return;
-
-      // Prefer the current index if it's a focusable item, otherwise fall back
-      // to the first focusable item in the group.
-      let targetIndex = currentIndex;
-      const currentItem = registeredItems.current[targetIndex];
-      if (!currentItem || !currentItem.focusable) {
-        targetIndex = findFirstFocusableIndex();
-      }
-
-      if (targetIndex === -1) return;
-
-      const targetItem = registeredItems.current[targetIndex];
-      if (!targetItem) return;
-
-      const element = group.querySelector(
-        `[data-roving-focus-item="${targetItem.id}"]`,
-      ) as HTMLElement | null;
-
-      if (element && document.activeElement !== element) {
-        element.focus({ preventScroll: true });
-        scrollIntoViewIfNeeded(element);
-      }
-    };
-
-    document.addEventListener("focusin", handleFocusIn);
-    return () => {
-      document.removeEventListener("focusin", handleFocusIn);
-    };
-  }, [currentIndex]);
-
-  return (
-    <RovingFocusContext.Provider value={contextValue}>
-      <Component
-        ref={groupRef}
-        data-orientation={orientation}
-        data-testid="roving-focus-group"
-        {...props}
-      />
-    </RovingFocusContext.Provider>
-  );
+const byDomOrder = (a: RegisteredItem, b: RegisteredItem) =>
+  a.element.compareDocumentPosition(b.element) &
+  Node.DOCUMENT_POSITION_FOLLOWING
+    ? -1
+    : 1;
+
+/**
+ * Picks the item that should be the tab stop: the active item if it is still
+ * registered and focusable, otherwise the closest focusable item after it (or
+ * before it), otherwise the first focusable item.
+ */
+function resolveTabStop(
+  items: RegisteredItem[],
+  activeId: string | null,
+): string | null {
+  const activeIndex = items.findIndex((item) => item.id === activeId);
+  if (activeIndex !== -1) {
+    if (items[activeIndex].focusable) return activeId;
+    const after = items.slice(activeIndex + 1).find((item) => item.focusable);
+    const before = items
+      .slice(0, activeIndex)
+      .reverse()
+      .find((item) => item.focusable);
+    return (after ?? before)?.id ?? null;
+  }
+  return items.find((item) => item.focusable)?.id ?? null;
 }
+
+export const RovingFocusGroup = forwardRef<HTMLElement, RovingFocusGroupProps>(
+  function RovingFocusGroup(
+    {
+      asChild = false,
+      onKeyDown,
+      loop = true,
+      orientation = "horizontal",
+      as = "div",
+      pageNavigation = false,
+      ...props
+    },
+    forwardedRef,
+  ) {
+    const [activeId, setActiveId] = useState<string | null>(null);
+    // Bumped whenever the set of registered items changes so the tab stop is
+    // re-derived from the registry.
+    const [, setRegistryVersion] = useState(0);
+    const registry = useRef(new Map<string, RegisteredItem>());
+    const groupRef = useRef<HTMLElement>(null);
+
+    const getItems = () => [...registry.current.values()].sort(byDomOrder);
+
+    const tabStopId = resolveTabStop(getItems(), activeId);
+
+    const registerItem = useCallback((item: RegisteredItem) => {
+      registry.current.set(item.id, item);
+      setRegistryVersion((v) => v + 1);
+    }, []);
+
+    const unregisterItem = useCallback((id: string) => {
+      registry.current.delete(id);
+      setRegistryVersion((v) => v + 1);
+    }, []);
+
+    const setDefaultActiveItem = useCallback((id: string) => {
+      if (registry.current.get(id)?.focusable === false) {
+        console.warn(
+          "The default active item is unfocusable. This is not recommended.",
+        );
+      }
+      setActiveId(id);
+    }, []);
+
+    // Find nearest scrollable parent (not the page itself)
+    const getScrollableParent = (element: HTMLElement): HTMLElement | null => {
+      let parent = element.parentElement;
+      while (parent && parent !== document.body) {
+        const { overflow, overflowY, overflowX } = getComputedStyle(parent);
+        if (/(auto|scroll)/.test(overflow + overflowY + overflowX)) {
+          return parent;
+        }
+        parent = parent.parentElement;
+      }
+      return null;
+    };
+
+    // Scroll element into view within scrollable container or page
+    const scrollIntoViewIfNeeded = (element: HTMLElement) => {
+      const scrollableParent = getScrollableParent(element);
+      const padding = 20;
+
+      if (!scrollableParent) {
+        // No scrollable parent — scroll the page itself
+        const rect = element.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+
+        let scrollX = window.scrollX;
+        let scrollY = window.scrollY;
+
+        if (rect.bottom + padding > viewportHeight) {
+          scrollY += rect.bottom + padding - viewportHeight;
+        } else if (rect.top - padding < 0) {
+          scrollY += rect.top - padding;
+        }
+
+        if (rect.right + padding > viewportWidth) {
+          scrollX += rect.right + padding - viewportWidth;
+        } else if (rect.left - padding < 0) {
+          scrollX += rect.left - padding;
+        }
+
+        window.scrollTo(scrollX, scrollY);
+        return;
+      }
+
+      const parentRect = scrollableParent.getBoundingClientRect();
+      const elementRect = element.getBoundingClientRect();
+
+      // Check if element is outside visible area of scrollable parent
+      if (elementRect.bottom + padding > parentRect.bottom) {
+        scrollableParent.scrollTop +=
+          elementRect.bottom + padding - parentRect.bottom;
+      } else if (elementRect.top - padding < parentRect.top) {
+        scrollableParent.scrollTop -=
+          parentRect.top - elementRect.top + padding;
+      }
+
+      if (elementRect.right + padding > parentRect.right) {
+        scrollableParent.scrollLeft +=
+          elementRect.right + padding - parentRect.right;
+      } else if (elementRect.left - padding < parentRect.left) {
+        scrollableParent.scrollLeft -=
+          parentRect.left - elementRect.left + padding;
+      }
+    };
+
+    const focusItem = (item: RegisteredItem | undefined) => {
+      if (!item) return;
+      setActiveId(item.id);
+      item.element.focus({ preventScroll: true });
+      scrollIntoViewIfNeeded(item.element);
+    };
+
+    // Moves along `items` from `fromId`, skipping unfocusable items. Returns
+    // undefined at an end when looping is disabled.
+    const findNext = (
+      items: RegisteredItem[],
+      fromId: string,
+      direction: 1 | -1,
+    ): RegisteredItem | undefined => {
+      const length = items.length;
+      const start = items.findIndex((item) => item.id === fromId);
+      if (start === -1) return items.find((item) => item.focusable);
+
+      for (let step = 1; step < length; step++) {
+        let index = start + direction * step;
+        if (loop) {
+          index = (index + length) % length;
+        } else if (index < 0 || index >= length) {
+          return undefined;
+        }
+        if (items[index].focusable) return items[index];
+      }
+      return undefined;
+    };
+
+    // Grid positions are computed from the current layout whenever a key is
+    // pressed, so they are never stale after resizes or re-renders.
+    const computeGridPositions = (items: RegisteredItem[]) => {
+      const rects = items.map((item) => ({
+        id: item.id,
+        rect: item.element.getBoundingClientRect(),
+      }));
+      const positions = new Map<string, GridPosition>();
+      if (rects.length === 0) return positions;
+
+      // Calculate row threshold based on smallest item height
+      const minHeight = Math.min(...rects.map(({ rect }) => rect.height));
+      const rowThreshold = Math.max(minHeight / 2, 1);
+
+      // Sort by top, then left
+      rects.sort((a, b) => {
+        const topDiff = a.rect.top - b.rect.top;
+        if (Math.abs(topDiff) > rowThreshold) return topDiff;
+        return a.rect.left - b.rect.left;
+      });
+
+      // Cluster into rows
+      let row = 0;
+      let column = 0;
+      let rowTop = rects[0].rect.top;
+      for (const { id, rect } of rects) {
+        if (Math.abs(rect.top - rowTop) > rowThreshold) {
+          row++;
+          column = 0;
+          rowTop = rect.top;
+        }
+        positions.set(id, { row, column });
+        column++;
+      }
+      return positions;
+    };
+
+    const handleGridKey = (key: string, fromId: string) => {
+      const items = getItems();
+      const positions = computeGridPositions(items);
+      const visual = items
+        .filter((item) => positions.has(item.id))
+        .sort((a, b) => {
+          const pa = positions.get(a.id)!;
+          const pb = positions.get(b.id)!;
+          return pa.row - pb.row || pa.column - pb.column;
+        });
+
+      if (key === "Home") return focusItem(visual.find((i) => i.focusable));
+      if (key === "End") {
+        return focusItem([...visual].reverse().find((i) => i.focusable));
+      }
+
+      const current = positions.get(fromId);
+      if (!current) return;
+      const horizontal = key === "ArrowRight" || key === "ArrowLeft";
+      const direction = key === "ArrowRight" || key === "ArrowDown" ? 1 : -1;
+      const line = visual
+        .filter((item) => {
+          const position = positions.get(item.id)!;
+          return horizontal
+            ? position.row === current.row
+            : position.column === current.column;
+        })
+        .sort((a, b) => {
+          const pa = positions.get(a.id)!;
+          const pb = positions.get(b.id)!;
+          return horizontal ? pa.column - pb.column : pa.row - pb.row;
+        });
+      focusItem(findNext(line, fromId, direction));
+    };
+
+    const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+      onKeyDown?.(event as KeyboardEvent<HTMLDivElement>);
+      if (event.defaultPrevented) return;
+
+      const itemElement = (event.target as HTMLElement).closest?.(
+        "[data-roving-focus-item]",
+      );
+      const fromId = itemElement?.getAttribute("data-roving-focus-item");
+      // Ignore keys from outside our items, e.g. from a nested group.
+      if (!fromId || registry.current.get(fromId)?.element !== itemElement) {
+        return;
+      }
+
+      let key = event.key;
+      if (pageNavigation && key === "PageUp") key = "Home";
+      if (pageNavigation && key === "PageDown") key = "End";
+
+      const keys =
+        orientation === "grid"
+          ? ["ArrowRight", "ArrowLeft", "ArrowDown", "ArrowUp"]
+          : orientation === "horizontal"
+            ? ["ArrowRight", "ArrowLeft"]
+            : ["ArrowDown", "ArrowUp"];
+      if (![...keys, "Home", "End"].includes(key)) return;
+
+      event.preventDefault();
+
+      if (orientation === "grid") return handleGridKey(key, fromId);
+
+      const items = getItems();
+      if (key === "Home") return focusItem(items.find((i) => i.focusable));
+      if (key === "End") {
+        return focusItem([...items].reverse().find((i) => i.focusable));
+      }
+      const direction = key === "ArrowRight" || key === "ArrowDown" ? 1 : -1;
+      focusItem(findNext(items, fromId, direction));
+    };
+
+    // Ensure focus moves from a scrollable parent into the roving items.
+    // Firefox can give focus to the scrollable container (e.g. a div with
+    // overflow:auto) instead of the first focusable item inside the group.
+    // When that happens, we immediately redirect focus to the tab stop so
+    // keyboard navigation works consistently.
+    useEffect(() => {
+      const handleFocusIn = (event: FocusEvent) => {
+        const group = groupRef.current;
+        if (!group) return;
+
+        const scrollableParent = getScrollableParent(group);
+        if (!scrollableParent || event.target !== scrollableParent) return;
+
+        const target = registry.current.get(tabStopId ?? "");
+        if (target && document.activeElement !== target.element) {
+          target.element.focus({ preventScroll: true });
+          scrollIntoViewIfNeeded(target.element);
+        }
+      };
+
+      document.addEventListener("focusin", handleFocusIn);
+      return () => {
+        document.removeEventListener("focusin", handleFocusIn);
+      };
+    }, [tabStopId]);
+
+    const contextValue: RovingFocusContextType = {
+      tabStopId,
+      setActiveId,
+      registerItem,
+      unregisterItem,
+      orientation,
+      loop,
+      setDefaultActiveItem,
+    };
+
+    const mergedRef = useMergedRefs(groupRef, forwardedRef);
+    const Component = asChild ? Slot : as;
+
+    return (
+      <RovingFocusContext.Provider value={contextValue}>
+        <Component
+          data-orientation={orientation}
+          {...props}
+          ref={mergedRef}
+          onKeyDown={handleKeyDown}
+        />
+      </RovingFocusContext.Provider>
+    );
+  },
+);
