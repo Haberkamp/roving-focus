@@ -38,8 +38,6 @@ jobs:
       contents: read
       # npm trusted publishing (OIDC) and provenance
       id-token: write
-      # GitHub Packages
-      packages: write
 
     steps:
       - uses: actions/checkout@v7
@@ -72,13 +70,3 @@ jobs:
       - name: Publish to npm
         run: npm publish --provenance --access public --tag ${{ steps.dist-tag.outputs.tag }}
 
-      # GitHub Packages only accepts packages scoped to the repository owner,
-      # so the package is published there as @haberkamp/roving-focus-react.
-      - name: Publish to GitHub Packages
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npm pkg set name=@haberkamp/roving-focus-react
-          npm pkg set publishConfig.registry=https://npm.pkg.github.com
-          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" > "$RUNNER_TEMP/.npmrc-gh"
-          npm publish --userconfig "$RUNNER_TEMP/.npmrc-gh" --tag ${{ steps.dist-tag.outputs.tag }}
