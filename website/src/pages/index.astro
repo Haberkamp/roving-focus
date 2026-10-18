@@ -18,16 +18,40 @@ import { ListDemo } from "../components/ListDemo";
   <body>
     <main class="mx-auto my-32 w-full max-w-xl px-6">
       <h1>Hello World</h1>
-      <div class="mt-8 flex flex-col gap-24">
-        <BrowserWindow>
-          <ListDemo client:load />
-        </BrowserWindow>
-        <BrowserWindow>
-          <HorizontalDemo client:load />
-        </BrowserWindow>
-        <BrowserWindow>
-          <GridDemo client:load />
-        </BrowserWindow>
+      <div class="mt-16 flex flex-col gap-24">
+        <section>
+          <h2 class="font-medium">Lorem ipsum dolor</h2>
+          <p class="mt-2 text-neutral-500">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
+            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+            ad minim veniam, quis nostrud exercitation.
+          </p>
+          <BrowserWindow class="mt-8">
+            <ListDemo client:load />
+          </BrowserWindow>
+        </section>
+        <section>
+          <h2 class="font-medium">Sed ut perspiciatis</h2>
+          <p class="mt-2 text-neutral-500">
+            Sed ut perspiciatis unde omnis iste natus error sit voluptatem
+            accusantium doloremque laudantium, totam rem aperiam, eaque ipsa
+            quae ab illo inventore veritatis.
+          </p>
+          <BrowserWindow class="mt-8">
+            <HorizontalDemo client:load />
+          </BrowserWindow>
+        </section>
+        <section>
+          <h2 class="font-medium">Nemo enim ipsam</h2>
+          <p class="mt-2 text-neutral-500">
+            Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut
+            fugit, sed quia consequuntur magni dolores eos qui ratione
+            voluptatem sequi nesciunt.
+          </p>
+          <BrowserWindow class="mt-8">
+            <GridDemo client:load />
+          </BrowserWindow>
+        </section>
       </div>
     </main>
   </body>
