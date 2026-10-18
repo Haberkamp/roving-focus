@@ -17,7 +17,7 @@ export function InstallSnippet() {
   };
 
   return (
-    <div className="flex items-center justify-between gap-3 font-mono text-[13px]">
+    <div className="flex items-center gap-2 font-mono text-[13px]">
       <code className="truncate">
         <span className="text-neutral-400 select-none" aria-hidden="true">
           ~{" "}
@@ -28,7 +28,7 @@ export function InstallSnippet() {
         type="button"
         onClick={copy}
         aria-label={copied ? "Copied" : "Copy install command"}
-        className="grid size-7 shrink-0 place-items-center rounded-md text-neutral-400 hover:bg-neutral-200/60 hover:text-neutral-700 focus-visible:outline-2 focus-visible:outline-neutral-500"
+        className="grid size-7 shrink-0 place-items-center rounded-md text-neutral-400 hover:bg-neutral-200/60 hover:text-neutral-700 focus-visible:bg-lime-300 focus-visible:text-neutral-900 focus-visible:outline-hidden"
       >
         {copied ? (
           <svg
