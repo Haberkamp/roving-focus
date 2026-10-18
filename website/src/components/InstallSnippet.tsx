@@ -17,7 +17,7 @@ export function InstallSnippet() {
   };
 
   return (
-    <div className="flex items-center gap-2 font-mono text-[13px]">
+    <div className="flex items-center gap-4 font-mono text-[13px]">
       <code className="truncate">
         <span className="text-neutral-400 select-none" aria-hidden="true">
           ~{" "}
