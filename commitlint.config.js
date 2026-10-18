@@ -3,8 +3,7 @@ export default {
   rules: {
     // Commit messages must not have a scope, e.g. "fix: …" not "fix(group): …".
     "scope-empty": [2, "always"],
-    // Dependabot bodies contain long release-note lines and URLs.
-    "body-max-line-length": [0],
-    "footer-max-line-length": [0],
   },
+  // Dependabot writes its own commit bodies (long release notes and URLs).
+  ignores: [(message) => message.includes("Signed-off-by: dependabot[bot]")],
 };
