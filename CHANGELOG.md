@@ -1,26 +1,29 @@
 # @roving-focus/react
 
-## [2.0.0](https://github.com/Haberkamp/roving-focus/compare/v2.0.0-0...v2.0.0) (2026-10-18)
+## [2.0.0](https://github.com/Haberkamp/roving-focus/compare/v1.1.0...v2.0.0) (2026-10-18)
 
+### ⚠ BREAKING CHANGES
+
+* Grid positions are detected from the DOM layout. The `position` prop on `RovingFocusItem` and the `GridPosition` export are removed. **Migration:** remove all `position={{ row, column }}` props, and use CSS Grid (`display: grid`) on the grid container.
+* `PageUp` / `PageDown` no longer move focus to the first or last item. They scroll as usual. Use `Home` / `End` instead.
+* The package is ESM-only (`"type": "module"`) and resolves through an `exports` map. `require()` and deep imports such as `@roving-focus/react/dist/...` are no longer supported.
+* The group no longer renders `data-testid="roving-focus-group"`. Pass `data-testid` yourself if your tests rely on it.
+* A consumer's `onKeyDown` on an item no longer replaces arrow-key navigation. Navigation still runs after it, so call `event.preventDefault()` to stop it.
+
+### Features
+
+* Support React 19 (`react: ^18.2.0 || ^19.0.0`).
+* `RovingFocusGroup` and `RovingFocusItem` forward `ref` (callback and object refs).
 
 ### Bug Fixes
 
-* id-based tab stop, DOM-order registration, composed handlers and refs, ESM packaging ([db53825](https://github.com/Haberkamp/roving-focus/commit/db538250f85f555596fe3c3c8112a3a198024d2c))
-
-## 2.0.0
-
-### Breaking Changes
-
-- Removed `GridPosition` export from public API
-- Removed `position` prop from `RovingFocusItem`
-
-Grid navigation now auto-detects item positions from the DOM layout using `getBoundingClientRect()`.
-
-**Migration:** Remove all `position={{ row, column }}` props from `RovingFocusItem` components. Ensure your grid container uses CSS Grid (`display: grid`) — the component will derive positions automatically.
-
-### Patch Changes
-
-- Fix Firefox-specific focus/scroll behavior for grid orientation inside scrollable parents so the focused cell, not the container, receives focus while the parent scrolls to reveal it
+* An item is always tabbable when items mount after the group or the list shrinks. The active item is tracked by id, and the tab stop is derived at render ([db53825](https://github.com/Haberkamp/roving-focus/commit/db538250f85f555596fe3c3c8112a3a198024d2c)).
+* Items register in a layout effect, and arrow keys follow DOM order, including for inserted items. The library is safe under StrictMode and concurrent rendering.
+* Consumer `onKeyDown` (item and group), `onFocus` and `onClick` handlers are composed, not dropped. Focusing an item by click, Tab or `.focus()` makes it the tab stop.
+* `loop={false}` stops cleanly at either end and skips any run of unfocusable items.
+* Arrow keys that don't apply to the orientation are no longer blocked.
+* `sideEffects: false` for better tree-shaking.
+* Firefox: in a grid inside a scrollable parent, the focused cell receives focus, not the container.
 
 ## 1.1.1
 
