@@ -1,0 +1,14 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "node",
+  "include-component-in-tag": false,
+  "pull-request-title-pattern": "chore: release ${version}",
+  "bootstrap-sha": "ea180980967e5c1d78d9af52473176978484ab14",
+  "packages": {
+    ".": {
+      "package-name": "@roving-focus/react",
+      "changelog-path": "CHANGELOG.md",
+      "release-as": "2.0.0"
+    }
+  }
+}

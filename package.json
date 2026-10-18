@@ -55,5 +55,9 @@
   ],
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Haberkamp/roving-focus.git"
   }
 }
