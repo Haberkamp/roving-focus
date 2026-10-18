@@ -14,6 +14,13 @@ jobs:
   ci:
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false
+      matrix:
+        react: ["18", "19"]
+
+    name: ci (React ${{ matrix.react }})
+
     steps:
       - uses: actions/checkout@v4
 
@@ -29,11 +36,77 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Use React ${{ matrix.react }}
+        if: matrix.react != '18'
+        run: pnpm add -D -w react@^${{ matrix.react }} react-dom@^${{ matrix.react }} @types/react@^${{ matrix.react }}
+
       - name: Check formatting
         run: pnpm format:check
+
+      - name: Build
+        run: pnpm build
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
       - name: Run tests
-        run: pnpm test
+        run: pnpm test --run
+
+  package:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        react: ["18", "19"]
+
+    name: package smoke test (React ${{ matrix.react }})
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build and pack
+        run: pnpm build && npm pack --pack-destination "$RUNNER_TEMP"
+
+      - name: Install tarball into a fresh project without peer warnings
+        working-directory: ${{ runner.temp }}
+        run: |
+          mkdir smoke && cd smoke
+          npm init -y > /dev/null
+          npm install react@^${{ matrix.react }} react-dom@^${{ matrix.react }} ../roving-focus-react-*.tgz 2>&1 | tee install.log
+          if grep -Ei "ERESOLVE|peer dep|invalid" install.log; then
+            echo "::error::peer dependency problem installing with React ${{ matrix.react }}"
+            exit 1
+          fi
+
+      - name: Import from Node ESM
+        working-directory: ${{ runner.temp }}/smoke
+        run: |
+          node -e "import('@roving-focus/react').then(m => { console.log(Object.keys(m)); if (!m.RovingFocusGroup || !m.RovingFocusItem) process.exit(1) })"
+
+      - name: Render on the server
+        working-directory: ${{ runner.temp }}/smoke
+        run: |
+          cat > ssr.mjs <<'JS'
+          import { createElement as h } from "react";
+          import { renderToString } from "react-dom/server";
+          import { RovingFocusGroup, RovingFocusItem } from "@roving-focus/react";
+          const html = renderToString(
+            h(RovingFocusGroup, null, h(RovingFocusItem, null, "A"), h(RovingFocusItem, null, "B")),
+          );
+          console.log(html);
+          if (!html.includes("data-roving-focus-item")) process.exit(1);
+          JS
+          node ssr.mjs
