@@ -65,9 +65,14 @@ describe.each([
         </>,
       );
       await expect.element(screen.getByText("Item 5")).not.toBeInTheDocument();
-      (document.activeElement as HTMLElement | null)?.blur();
+      await expect
+        .element(screen.getByText("Item 1"))
+        .toHaveAttribute("tabindex", "0");
 
-      await userEvent.keyboard("{Tab}");
+      // Chromium resumes sequential navigation from the removed node, so
+      // re-enter the group from the following button instead.
+      (screen.getByText("Outside").element() as HTMLElement).focus();
+      await userEvent.keyboard("{Shift>}{Tab}{/Shift}");
 
       await expect.element(screen.getByText("Item 1")).toHaveFocus();
     },
