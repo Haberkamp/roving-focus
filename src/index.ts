@@ -1,5 +1,8 @@
 export {
   RovingFocusGroup,
   type RovingFocusGroupProps,
-} from "./RovingFocusGroup";
-export { RovingFocusItem, type RovingFocusItemProps } from "./RovingFocusItem";
+} from "./RovingFocusGroup.js";
+export {
+  RovingFocusItem,
+  type RovingFocusItemProps,
+} from "./RovingFocusItem.js";

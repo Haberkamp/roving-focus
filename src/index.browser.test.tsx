@@ -303,7 +303,7 @@ it.each(["PageDown", "End"])(
   async (key) => {
     // ARRANGE
     const screen = await render(
-      <RovingFocusGroup>
+      <RovingFocusGroup pageNavigation>
         <RovingFocusItem>Item 1</RovingFocusItem>
         <RovingFocusItem>Item 2</RovingFocusItem>
         <RovingFocusItem>Item 3</RovingFocusItem>
@@ -338,7 +338,7 @@ it.each(["PageUp", "Home"])(
   async (key) => {
     // ARRANGE
     const screen = await render(
-      <RovingFocusGroup>
+      <RovingFocusGroup pageNavigation>
         <RovingFocusItem>Item 1</RovingFocusItem>
         <RovingFocusItem>Item 2</RovingFocusItem>
         <RovingFocusItem>Item 3</RovingFocusItem>
@@ -659,6 +659,7 @@ it.each([["horizontal", "vertical"] as const])(
     // ARRANGE
     const screen = await render(
       <RovingFocusGroup
+        data-testid="roving-focus-group"
         orientation={orientation}
         style={{ display: "flex", flexDirection: "row" }}
       >
@@ -677,7 +678,7 @@ it.each([["horizontal", "vertical"] as const])(
 it('adds a data-orientation="horizontal" attribute to the group when no orientation is provided', async () => {
   // ARRANGE
   const screen = await render(
-    <RovingFocusGroup>
+    <RovingFocusGroup data-testid="roving-focus-group">
       <RovingFocusItem>Item 1</RovingFocusItem>
       <RovingFocusItem>Item 2</RovingFocusItem>
     </RovingFocusGroup>,
@@ -714,7 +715,7 @@ it.each([["horizontal", "vertical"] as const])(
 it("renders the group as a div by default", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingFocusGroup>
+    <RovingFocusGroup data-testid="roving-focus-group">
       <RovingFocusItem>Item 1</RovingFocusItem>
       <RovingFocusItem>Item 2</RovingFocusItem>
     </RovingFocusGroup>,
@@ -729,7 +730,7 @@ it("renders the group as a div by default", async () => {
 it("renders the group as a span when using the as prop", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingFocusGroup as="span">
+    <RovingFocusGroup data-testid="roving-focus-group" as="span">
       <RovingFocusItem>Item 1</RovingFocusItem>
       <RovingFocusItem>Item 2</RovingFocusItem>
     </RovingFocusGroup>,
@@ -744,7 +745,7 @@ it("renders the group as a span when using the as prop", async () => {
 it("renders the group as a span when using the asChild prop", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingFocusGroup asChild>
+    <RovingFocusGroup data-testid="roving-focus-group" asChild>
       <span>
         <RovingFocusItem>Item 1</RovingFocusItem>
         <RovingFocusItem>Item 2</RovingFocusItem>
@@ -761,7 +762,7 @@ it("renders the group as a span when using the asChild prop", async () => {
 it("prefers the asChild prop over the as prop for the group component", async () => {
   // ARRANGE
   const screen = await render(
-    <RovingFocusGroup as="span" asChild>
+    <RovingFocusGroup data-testid="roving-focus-group" as="span" asChild>
       <div>
         <RovingFocusItem>Item 1</RovingFocusItem>
         <RovingFocusItem>Item 2</RovingFocusItem>
@@ -1018,7 +1019,11 @@ describe("grid orientation", () => {
   it('renders group with data-orientation="grid"', async () => {
     // ARRANGE
     const screen = render(
-      <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
+      <RovingFocusGroup
+        data-testid="roving-focus-group"
+        orientation="grid"
+        style={gridStyle(2)}
+      >
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
         </RovingFocusItem>
@@ -1455,7 +1460,11 @@ describe("grid orientation", () => {
     async (key) => {
       // ARRANGE - 2x2 grid
       const screen = render(
-        <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
+        <RovingFocusGroup
+          pageNavigation
+          orientation="grid"
+          style={gridStyle(2)}
+        >
           <RovingFocusItem style={{ width: 50, height: 50 }}>
             Cell 0,0
           </RovingFocusItem>
@@ -1490,7 +1499,11 @@ describe("grid orientation", () => {
     async (key) => {
       // ARRANGE - 2x2 grid
       const screen = render(
-        <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
+        <RovingFocusGroup
+          pageNavigation
+          orientation="grid"
+          style={gridStyle(2)}
+        >
           <RovingFocusItem style={{ width: 50, height: 50 }}>
             Cell 0,0
           </RovingFocusItem>
@@ -2342,6 +2355,7 @@ describe("grid orientation - auto-detection", () => {
       // ARRANGE
       const screen = render(
         <RovingFocusGroup
+          pageNavigation
           orientation="grid"
           style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
         >
@@ -2370,6 +2384,7 @@ describe("grid orientation - auto-detection", () => {
       // ARRANGE
       const screen = render(
         <RovingFocusGroup
+          pageNavigation
           orientation="grid"
           style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
         >

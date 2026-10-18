@@ -1,5 +1,16 @@
 {
   "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": []
+  },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.*", "**/*.spec.*"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "src/vitest.shims.d.ts"
+  ]
 }
