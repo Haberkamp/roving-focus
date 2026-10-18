@@ -2,7 +2,7 @@ import { render } from "vitest-browser-react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { RovingFocusGroup } from "./RovingFocusGroup";
 import { RovingFocusItem } from "./RovingFocusItem";
-import { userEvent, page, server } from "@vitest/browser/context";
+import { userEvent, page, server } from "vitest/browser";
 import { useState } from "react";
 
 const isWebkit =
@@ -872,7 +872,7 @@ it("focuses the first focusable item when pressing the Home key", async () => {
 
 it("focuses the next item when pressing the right arrow key after the clicked on an item that is not the first item", async () => {
   // ARRANGE
-  const screen = render(
+  const screen = await render(
     <RovingFocusGroup>
       <RovingFocusItem>Item 1</RovingFocusItem>
       <RovingFocusItem>Item 2</RovingFocusItem>
@@ -904,14 +904,14 @@ it("focuses the next item when pressing the right arrow key after the clicked on
 
 it("throws an error when using the RovingFocusItem outside of a RovingFocusGroup", async () => {
   // ARRANGE
-  expect(() => {
-    render(<RovingFocusItem>Item 1</RovingFocusItem>);
-  }).toThrow("useRovingFocus must be used within a RovingFocusGroup");
+  await expect(
+    render(<RovingFocusItem>Item 1</RovingFocusItem>),
+  ).rejects.toThrow("useRovingFocus must be used within a RovingFocusGroup");
 });
 
 it("focuses the item which is marked as the defaul active item", async () => {
   // ARRANGE
-  const screen = render(
+  const screen = await render(
     <RovingFocusGroup>
       <RovingFocusItem>Item 1</RovingFocusItem>
       <RovingFocusItem active>Item 2</RovingFocusItem>
@@ -934,7 +934,7 @@ it("focuses the item which is marked as the defaul active item", async () => {
 
 it("adds a data-active attribute to the default active item", async () => {
   // ARRANGE
-  const screen = render(
+  const screen = await render(
     <RovingFocusGroup>
       <RovingFocusItem active>Item 1</RovingFocusItem>
       <RovingFocusItem>Item 2</RovingFocusItem>
@@ -955,7 +955,7 @@ it("logs a message to the console when the default active item is unfocusable", 
   // ARRANGE
   const consoleWarnSpy = vi.spyOn(console, "warn");
 
-  render(
+  await render(
     <RovingFocusGroup>
       <RovingFocusItem focusable={false} active>
         Item 1
@@ -971,7 +971,7 @@ it("logs a message to the console when the default active item is unfocusable", 
 
 it("focuses the next focusable item when the default active item is unfocusable", async () => {
   // ARRANGE
-  const screen = render(
+  const screen = await render(
     <RovingFocusGroup>
       <RovingFocusItem>Item 1</RovingFocusItem>
       <RovingFocusItem focusable={false} active>
@@ -1018,7 +1018,7 @@ describe("grid orientation", () => {
 
   it('renders group with data-orientation="grid"', async () => {
     // ARRANGE
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup
         data-testid="roving-focus-group"
         orientation="grid"
@@ -1041,7 +1041,7 @@ describe("grid orientation", () => {
 
   it('renders items with data-orientation="grid"', async () => {
     // ARRANGE
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1067,7 +1067,7 @@ describe("grid orientation", () => {
 
   it("focuses next cell in row when pressing ArrowRight", async () => {
     // ARRANGE - 3 items in a row
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" style={gridStyle(3)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1097,7 +1097,7 @@ describe("grid orientation", () => {
 
   it("focuses previous cell in row when pressing ArrowLeft", async () => {
     // ARRANGE - 2 items in a row
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1125,7 +1125,7 @@ describe("grid orientation", () => {
 
   it("loops to first cell in row when pressing ArrowRight on last cell (loop=true)", async () => {
     // ARRANGE - 2 items in a row
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" loop={true} style={gridStyle(2)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1147,7 +1147,7 @@ describe("grid orientation", () => {
 
   it("stays on last cell in row when pressing ArrowRight on last cell (loop=false)", async () => {
     // ARRANGE - 2 items in a row
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" loop={false} style={gridStyle(2)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1169,7 +1169,7 @@ describe("grid orientation", () => {
 
   it("loops to last cell in row when pressing ArrowLeft on first cell (loop=true)", async () => {
     // ARRANGE - 2 items in a row
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" loop={true} style={gridStyle(2)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1190,7 +1190,7 @@ describe("grid orientation", () => {
 
   it("stays on first cell in row when pressing ArrowLeft on first cell (loop=false)", async () => {
     // ARRANGE - 2 items in a row
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" loop={false} style={gridStyle(2)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1215,7 +1215,7 @@ describe("grid orientation", () => {
 
   it("focuses next cell in column when pressing ArrowDown", async () => {
     // ARRANGE - 3 items in a column (1 col grid)
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" style={gridStyle(1)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1245,7 +1245,7 @@ describe("grid orientation", () => {
 
   it("focuses previous cell in column when pressing ArrowUp", async () => {
     // ARRANGE - 2 items in a column
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" style={gridStyle(1)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1273,7 +1273,7 @@ describe("grid orientation", () => {
 
   it("loops to first cell in column when pressing ArrowDown on last cell (loop=true)", async () => {
     // ARRANGE - 2 items in a column
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" loop={true} style={gridStyle(1)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1295,7 +1295,7 @@ describe("grid orientation", () => {
 
   it("stays on last cell in column when pressing ArrowDown on last cell (loop=false)", async () => {
     // ARRANGE - 2 items in a column
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" loop={false} style={gridStyle(1)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1317,7 +1317,7 @@ describe("grid orientation", () => {
 
   it("loops to last cell in column when pressing ArrowUp on first cell (loop=true)", async () => {
     // ARRANGE - 2 items in a column
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" loop={true} style={gridStyle(1)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1338,7 +1338,7 @@ describe("grid orientation", () => {
 
   it("stays on first cell in column when pressing ArrowUp on first cell (loop=false)", async () => {
     // ARRANGE - 2 items in a column
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" loop={false} style={gridStyle(1)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1363,7 +1363,7 @@ describe("grid orientation", () => {
 
   it("navigates within row without crossing to other rows via ArrowRight", async () => {
     // ARRANGE - 2x2 grid
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" loop={false} style={gridStyle(2)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1391,7 +1391,7 @@ describe("grid orientation", () => {
 
   it("navigates within column without crossing to other columns via ArrowDown", async () => {
     // ARRANGE - 2x2 grid
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" loop={false} style={gridStyle(2)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1419,7 +1419,7 @@ describe("grid orientation", () => {
 
   it("navigates full 2D grid: right, down, left, up", async () => {
     // ARRANGE - 2x2 grid
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1459,7 +1459,7 @@ describe("grid orientation", () => {
     "focuses first focusable cell in grid when pressing %s",
     async (key) => {
       // ARRANGE - 2x2 grid
-      const screen = render(
+      const screen = await render(
         <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
           <RovingFocusItem style={{ width: 50, height: 50 }}>
             Cell 0,0
@@ -1494,7 +1494,7 @@ describe("grid orientation", () => {
     "focuses last focusable cell in grid when pressing %s",
     async (key) => {
       // ARRANGE - 2x2 grid
-      const screen = render(
+      const screen = await render(
         <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
           <RovingFocusItem style={{ width: 50, height: 50 }}>
             Cell 0,0
@@ -1525,7 +1525,7 @@ describe("grid orientation", () => {
 
   it("Home skips unfocusable first cell and focuses next focusable", async () => {
     // ARRANGE - 2x2 grid with first cell unfocusable
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
         <RovingFocusItem style={{ width: 50, height: 50 }} focusable={false}>
           Cell 0,0
@@ -1550,7 +1550,7 @@ describe("grid orientation", () => {
 
   it("End skips unfocusable last cell and focuses previous focusable", async () => {
     // ARRANGE - 2x2 grid with last cell unfocusable
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1581,7 +1581,7 @@ describe("grid orientation", () => {
 
   it("skips non-focusable items when navigating right in row", async () => {
     // ARRANGE - 3 items in a row, middle one unfocusable
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" style={gridStyle(3)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1606,7 +1606,7 @@ describe("grid orientation", () => {
 
   it("skips non-focusable items when navigating down in column", async () => {
     // ARRANGE - 3 items in a column, middle one unfocusable
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" style={gridStyle(1)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1631,7 +1631,7 @@ describe("grid orientation", () => {
 
   it("non-focusable items have data-disabled and tabindex=-1", async () => {
     // ARRANGE
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1657,7 +1657,7 @@ describe("grid orientation", () => {
 
   it("keeps focus on same element when layout changes via rerender", async () => {
     // ARRANGE - 2x2 grid
-    const { rerender, getByText } = render(
+    const { rerender, getByText } = await render(
       <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell A
@@ -1677,7 +1677,7 @@ describe("grid orientation", () => {
     await userEvent.keyboard("{ArrowRight}"); // focus Cell B
 
     // ACT - rerender with changed layout (1 column)
-    rerender(
+    await rerender(
       <RovingFocusGroup orientation="grid" style={gridStyle(1)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell A
@@ -1705,7 +1705,7 @@ describe("grid orientation", () => {
 
   it("ArrowRight loops within row, not to next row", async () => {
     // ARRANGE - 2x2 grid, test that looping stays in row 0
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" loop={true} style={gridStyle(2)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1733,7 +1733,7 @@ describe("grid orientation", () => {
 
   it("ArrowDown loops within column, not to next column", async () => {
     // ARRANGE - 2x2 grid, test that looping stays in column 0
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" loop={true} style={gridStyle(2)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1765,7 +1765,7 @@ describe("grid orientation", () => {
 
   it("focuses the default active item in grid mode", async () => {
     // ARRANGE - 2x2 grid with second item active
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1792,7 +1792,7 @@ describe("grid orientation", () => {
   it("falls back to next focusable when default active is unfocusable in grid", async () => {
     // ARRANGE
     vi.spyOn(console, "warn").mockImplementation(() => {});
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup orientation="grid" style={gridStyle(2)}>
         <RovingFocusItem style={{ width: 50, height: 50 }}>
           Cell 0,0
@@ -1829,7 +1829,7 @@ describe("grid orientation - auto-detection", () => {
 
   it("Tab focuses first cell in CSS grid", async () => {
     // ARRANGE
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup
         orientation="grid"
         style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
@@ -1851,7 +1851,7 @@ describe("grid orientation - auto-detection", () => {
 
   it("ArrowRight moves focus horizontally in CSS grid", async () => {
     // ARRANGE
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup
         orientation="grid"
         style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
@@ -1874,7 +1874,7 @@ describe("grid orientation - auto-detection", () => {
 
   it("ArrowLeft moves focus back horizontally in CSS grid", async () => {
     // ARRANGE
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup
         orientation="grid"
         style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
@@ -1898,7 +1898,7 @@ describe("grid orientation - auto-detection", () => {
 
   it("ArrowDown moves focus vertically in CSS grid", async () => {
     // ARRANGE
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup
         orientation="grid"
         style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
@@ -1921,7 +1921,7 @@ describe("grid orientation - auto-detection", () => {
 
   it("ArrowUp moves focus up vertically in CSS grid", async () => {
     // ARRANGE
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup
         orientation="grid"
         style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
@@ -1945,7 +1945,7 @@ describe("grid orientation - auto-detection", () => {
 
   it("loops within row when loop=true", async () => {
     // ARRANGE
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup
         orientation="grid"
         loop={true}
@@ -1971,7 +1971,7 @@ describe("grid orientation - auto-detection", () => {
 
   it("stops at row edge when loop=false", async () => {
     // ARRANGE
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup
         orientation="grid"
         loop={false}
@@ -2001,7 +2001,7 @@ describe("grid orientation - auto-detection", () => {
 
   it("adapts navigation to new layout after viewport resize", async () => {
     // ARRANGE - Use fixed columns that we can control
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup
         orientation="grid"
         style={{
@@ -2029,7 +2029,7 @@ describe("grid orientation - auto-detection", () => {
 
   it("maintains focus on same cell after resize", async () => {
     // ARRANGE
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup
         orientation="grid"
         style={{
@@ -2064,7 +2064,7 @@ describe("grid orientation - auto-detection", () => {
 
   it("navigates by visual position not DOM order with dense packing", async () => {
     // ARRANGE - item 0 spans 2 columns, causing dense reorder
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup
         orientation="grid"
         style={{
@@ -2119,7 +2119,7 @@ describe("grid orientation - auto-detection", () => {
       );
     }
 
-    const screen = render(<DynamicGrid />);
+    const screen = await render(<DynamicGrid />);
     // Wait for initial grid positions
     await new Promise((r) =>
       requestAnimationFrame(() => requestAnimationFrame(r)),
@@ -2170,7 +2170,7 @@ describe("grid orientation - auto-detection", () => {
       );
     }
 
-    const screen = render(<DynamicGrid />);
+    const screen = await render(<DynamicGrid />);
     // Wait for initial grid positions
     await new Promise((r) =>
       requestAnimationFrame(() => requestAnimationFrame(r)),
@@ -2202,7 +2202,7 @@ describe("grid orientation - auto-detection", () => {
 
   it("skips non-focusable items in auto-detected grid", async () => {
     // ARRANGE
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup
         orientation="grid"
         style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
@@ -2233,7 +2233,7 @@ describe("grid orientation - auto-detection", () => {
 
   it("non-focusable items have correct attributes in auto-detected grid", async () => {
     // ARRANGE
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup
         orientation="grid"
         style={{ display: "grid", gridTemplateColumns: "repeat(2, 50px)" }}
@@ -2260,7 +2260,7 @@ describe("grid orientation - auto-detection", () => {
 
   it.skipIf(isWebkit)("Tab moves between separate grid groups", async () => {
     // ARRANGE
-    const screen = render(
+    const screen = await render(
       <div>
         <RovingFocusGroup
           orientation="grid"
@@ -2297,7 +2297,7 @@ describe("grid orientation - auto-detection", () => {
 
   it("arrow keys stay within their own grid group", async () => {
     // ARRANGE
-    const screen = render(
+    const screen = await render(
       <div>
         <RovingFocusGroup
           orientation="grid"
@@ -2345,7 +2345,7 @@ describe("grid orientation - auto-detection", () => {
     "%s moves to first focusable cell in auto-detected grid",
     async (key) => {
       // ARRANGE
-      const screen = render(
+      const screen = await render(
         <RovingFocusGroup
           orientation="grid"
           style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
@@ -2373,7 +2373,7 @@ describe("grid orientation - auto-detection", () => {
     "%s moves to last focusable cell in auto-detected grid",
     async (key) => {
       // ARRANGE
-      const screen = render(
+      const screen = await render(
         <RovingFocusGroup
           orientation="grid"
           style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
@@ -2397,7 +2397,7 @@ describe("grid orientation - auto-detection", () => {
 
   it("Home skips unfocusable first cell in auto-detected grid", async () => {
     // ARRANGE
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup
         orientation="grid"
         style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
@@ -2425,7 +2425,7 @@ describe("grid orientation - auto-detection", () => {
 
   it("End skips unfocusable last cell in auto-detected grid", async () => {
     // ARRANGE
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup
         orientation="grid"
         style={{ display: "grid", gridTemplateColumns: "repeat(3, 50px)" }}
@@ -2459,7 +2459,7 @@ describe("scroll behavior", () => {
   it("does not scroll page when navigating visible items", async () => {
     // ARRANGE - page scrolled down, grid visible but page has more content below
     await page.viewport(800, 600);
-    const screen = render(
+    const screen = await render(
       <div>
         <div style={{ height: 200 }} data-testid="spacer-top" />
         <RovingFocusGroup
@@ -2494,7 +2494,7 @@ describe("scroll behavior", () => {
 
   it("scrolls scrollable parent to keep focused item visible", async () => {
     // ARRANGE - small scrollable container, many items
-    const screen = render(
+    const screen = await render(
       <div
         data-testid="scroll-container"
         style={{ height: 80, overflow: "auto" }}
@@ -2530,7 +2530,7 @@ describe("scroll behavior", () => {
   it("scrolls page to keep focused item visible when outside viewport", async () => {
     // ARRANGE - small viewport, grid taller than viewport
     await page.viewport(800, 300);
-    const screen = render(
+    const screen = await render(
       <RovingFocusGroup
         orientation="grid"
         style={{ display: "grid", gridTemplateColumns: "repeat(2, 50px)" }}

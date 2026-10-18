@@ -1,6 +1,6 @@
 import { render } from "vitest-browser-react";
 import { describe, expect, it, vi } from "vitest";
-import { userEvent, server } from "@vitest/browser/context";
+import { userEvent, server } from "vitest/browser";
 import { StrictMode, createRef, type ReactNode } from "react";
 import { RovingFocusGroup } from "./RovingFocusGroup";
 import { RovingFocusItem } from "./RovingFocusItem";
@@ -31,7 +31,7 @@ describe.each([
   it("makes the first item tabbable when items arrive after mount", async () => {
     const screen = await render(<List items={[]} />, { wrapper });
 
-    screen.rerender(<List items={["Item 1", "Item 2", "Item 3"]} />);
+    await screen.rerender(<List items={["Item 1", "Item 2", "Item 3"]} />);
     await expect.element(screen.getByText("Item 1")).toBeInTheDocument();
 
     await userEvent.keyboard("{Tab}");
@@ -58,7 +58,7 @@ describe.each([
       await userEvent.keyboard("{End}");
       await expect.element(screen.getByText("Item 5")).toHaveFocus();
 
-      screen.rerender(
+      await screen.rerender(
         <>
           <List items={["Item 1", "Item 2"]} />
           <button>Outside</button>
@@ -82,7 +82,7 @@ describe.each([
     const screen = await render(<List items={["Item 1", "Item 2"]} />, {
       wrapper,
     });
-    screen.rerender(<List items={["Item 1", "New", "Item 2"]} />);
+    await screen.rerender(<List items={["Item 1", "New", "Item 2"]} />);
     await expect.element(screen.getByText("New")).toBeInTheDocument();
 
     await screen.getByText("Item 1").click();
