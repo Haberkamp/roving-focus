@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import BrowserWindow from "../components/BrowserWindow.astro";
+import { GridDemo } from "../components/GridDemo";
 import { HorizontalDemo } from "../components/HorizontalDemo";
 import { ListDemo } from "../components/ListDemo";
 ---
@@ -23,6 +24,9 @@ import { ListDemo } from "../components/ListDemo";
         </BrowserWindow>
         <BrowserWindow>
           <HorizontalDemo client:load />
+        </BrowserWindow>
+        <BrowserWindow>
+          <GridDemo client:load />
         </BrowserWindow>
       </div>
     </main>
