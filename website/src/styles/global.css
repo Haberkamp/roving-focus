@@ -9,4 +9,8 @@
   html {
     font-size: 14px;
   }
+
+  ::selection {
+    background-color: --alpha(var(--color-lime-300) / 50%);
+  }
 }
