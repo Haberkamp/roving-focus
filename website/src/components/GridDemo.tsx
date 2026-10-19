@@ -58,10 +58,15 @@ export function GridDemo() {
             <RovingFocusItem
               key={`${row}-${column}`}
               aria-label={`${columns[column]}${row + 1}`}
-              className={`flex cursor-cell items-center border-neutral-200 px-1.5 outline-hidden focus:relative focus:z-10 focus:outline-2 focus:outline-solid focus:-outline-offset-1 focus:outline-neutral-500 ${
+              className={`flex cursor-cell items-center border-neutral-200 px-1.5 outline-hidden hover:bg-neutral-50 focus:relative focus:z-10 focus:outline-2 focus:outline-solid focus:-outline-offset-1 focus:outline-neutral-500 ${
                 column < columns.length - 1 ? "border-r" : ""
               } ${row < rows.length - 1 ? "border-b" : ""} ${
                 column === 0 ? "justify-start" : "justify-end"
+              } ${
+                // Follow the browser window's rounded corner (rounded-xl minus its 1px border).
+                column === columns.length - 1 && row === rows.length - 1
+                  ? "rounded-br-[calc(var(--radius-xl)-1px)]"
+                  : ""
               }`}
             >
               {width && (
