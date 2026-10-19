@@ -1,5 +1,16 @@
 # @roving-focus/react
 
+## [3.0.0](https://github.com/Haberkamp/roving-focus/compare/v2.0.0...v3.0.0) (2026-10-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* the runtime dependency @radix-ui/react-slot moves from 1.2.3 to 1.5.0 and the package is now compiled with TypeScript 7.
+
+### Miscellaneous Chores
+
+* upgrade package dependencies to their latest versions ([#33](https://github.com/Haberkamp/roving-focus/issues/33)) ([db7c199](https://github.com/Haberkamp/roving-focus/commit/db7c1990f0c5beef036255c487f5c8e4ec83c9b1))
+
 ## [2.0.0](https://github.com/Haberkamp/roving-focus/compare/v1.1.0...v2.0.0) (2026-10-18)
 
 ### ⚠ BREAKING CHANGES
