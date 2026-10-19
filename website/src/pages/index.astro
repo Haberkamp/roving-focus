@@ -1,9 +1,10 @@
 ---
-import "../styles.css";
-import "../font.css";
-
-import { InstallSnippet } from "../components/InstallSnippet";
-import { GridExample } from "../components/GridExample";
+import "../styles/global.css";
+import BrowserWindow from "../components/BrowserWindow.astro";
+import { GridDemo } from "../components/GridDemo";
+import { HorizontalDemo } from "../components/HorizontalDemo";
+import InstallSnippet from "../components/InstallSnippet.astro";
+import { ListDemo } from "../components/ListDemo";
 ---
 
 <html lang="en">
@@ -12,33 +13,69 @@ import { GridExample } from "../components/GridExample";
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
-    <meta
-      name="description"
-      content="Let users move through a list or grid of items using arrow keys."
-    />
     <title>Roving Focus</title>
   </head>
-  <body class="selection:bg-black selection:text-white bg-[#FFFCF5]">
-    <div class="container min-h-screen grid place-items-center">
-      <div class="py-48 lg:py-0 grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-32 lg:gap-0 justify-items-center lg:justify-items-start lg:justify-between w-full">
-        <div class="max-w-[410px]">
-          <h1 class="text-4xl font-black text-[64px]/[1.1]">Roving Focus</h1>
-
-          <div class="pt-4"></div>
-
-          <p class="text-2xl/[1.3]">
-            Let users move through a list or grid of items using arrow keys.
-          </p>
-
-          <div class="pt-12"></div>
-
-          <InstallSnippet className="w-full" client:load />
-        </div>
-
-        <div class="touch:hidden">
-          <GridExample client:load />
-        </div>
+  <body>
+    <main class="mx-auto mt-32 w-full max-w-xl px-6">
+      <h1 class="font-medium">Roving Focus</h1>
+      <div class="mt-6">
+        <InstallSnippet />
       </div>
-    </div>
+      <a
+        href="https://github.com/Haberkamp/roving-focus#readme"
+        class="mt-4 inline-block text-neutral-900 underline decoration-neutral-300 decoration-dashed underline-offset-4 hover:decoration-neutral-900 rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-300"
+      >
+        Docs
+      </a>
+      <div class="mt-16 flex flex-col gap-24">
+        <section>
+          <h2 class="font-medium">Vertical layout</h2>
+          <p class="mt-2 text-neutral-500">
+            Hit tab or click on an item to focus one. You can then use the up
+            and down arrows to move the focus around
+          </p>
+          <BrowserWindow class="mt-8">
+            <ListDemo client:load />
+          </BrowserWindow>
+        </section>
+        <section>
+          <h2 class="font-medium">Horizontal layout</h2>
+          <p class="mt-2 text-neutral-500">
+            For this one, you need to press the left and right arrow keys. Do
+            you noticed that when you press the right arrow key on the last item
+            it loops back to the first one?
+          </p>
+          <BrowserWindow class="mt-8">
+            <HorizontalDemo client:load />
+          </BrowserWindow>
+        </section>
+        <section>
+          <h2 class="font-medium">Grid layouts</h2>
+          <p class="mt-2 text-neutral-500">
+            The library also supports grid layouts.
+          </p>
+          <BrowserWindow class="mt-8">
+            <GridDemo client:load />
+          </BrowserWindow>
+        </section>
+      </div>
+    </main>
+    <footer class="mx-auto mt-32 mb-16 flex w-full max-w-xl justify-between px-6 text-neutral-500">
+      <p>
+        Made by{" "}
+        <a
+          href="https://x.com/n_haberkamp"
+          class="text-neutral-900 underline decoration-neutral-300 decoration-dashed underline-offset-4 hover:decoration-neutral-900 rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-300"
+        >
+          Nils Haberkamp
+        </a>
+      </p>
+      <a
+        href="https://github.com/Haberkamp/roving-focus"
+        class="text-neutral-900 underline decoration-neutral-300 decoration-dashed underline-offset-4 hover:decoration-neutral-900 rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-300"
+      >
+        GitHub
+      </a>
+    </footer>
   </body>
 </html>
