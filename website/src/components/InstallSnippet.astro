@@ -1,0 +1,15 @@
+---
+import { CopyButton } from "./CopyButton";
+
+const command = "pnpm install @roving-focus/react";
+---
+
+<div class="flex items-center gap-4 font-mono text-[13px]">
+  <code class="truncate">
+    <span class="text-neutral-400 select-none" aria-hidden="true">
+      ~{" "}
+    </span>
+    {command}
+  </code>
+  <CopyButton client:load text={command} label="Copy install command" />
+</div>

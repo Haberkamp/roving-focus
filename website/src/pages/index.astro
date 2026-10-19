@@ -3,7 +3,7 @@ import "../styles/global.css";
 import BrowserWindow from "../components/BrowserWindow.astro";
 import { GridDemo } from "../components/GridDemo";
 import { HorizontalDemo } from "../components/HorizontalDemo";
-import { InstallSnippet } from "../components/InstallSnippet";
+import InstallSnippet from "../components/InstallSnippet.astro";
 import { ListDemo } from "../components/ListDemo";
 ---
 
@@ -20,7 +20,7 @@ import { ListDemo } from "../components/ListDemo";
     <main class="mx-auto mt-32 w-full max-w-xl px-6">
       <h1>Roving Focus</h1>
       <div class="mt-6">
-        <InstallSnippet client:load />
+        <InstallSnippet />
       </div>
       <div class="mt-16 flex flex-col gap-24">
         <section>
